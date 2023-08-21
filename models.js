@@ -19,30 +19,35 @@ const TypeAd = sequelize.define('typeAd', {
 })
 
 const StatusAd = sequelize.define('statusAd', {
-    id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
+    id: {type: DataTypes.UUID, primaryKey: true},
+    name: {type: DataTypes.STRING}
 })
 
 const Category = sequelize.define('category', {
-    id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
+    id: {type: DataTypes.UUID, primaryKey: true},
+    name: {type: DataTypes.STRING}
 })
 
 const SubCategory = sequelize.define('subCategory', {
-    id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
+    id: {type: DataTypes.UUID, primaryKey: true},
+    name: {type: DataTypes.STRING}
 })
 
 const Objects = sequelize.define('objects', {
-    id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
+    id: {type: DataTypes.UUID, primaryKey: true},
+    name: {type: DataTypes.STRING}
 })
 
 const User = sequelize.define('user', {
     id: {type: DataTypes.UUID, primaryKey: true},
     name: {type: DataTypes.STRING, allowNull: false},
     email: {type: DataTypes.STRING, allowNull: false},
-    phone: {type: DataTypes.STRING, allowNull: false},
+    phone: {type: DataTypes.STRING, allowNull: false}
 })
 
-const Role = sequelize.define('user', {
-    id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING, allowNull: false},
+const Role = sequelize.define('role', {
+    id: {type: DataTypes.UUID, primaryKey: true},
+    name: {type: DataTypes.STRING, allowNull: false},
 })
 
 //Relationships

@@ -14,7 +14,6 @@ app.use(express.json())
 app.use('/api', router)
 
 
-
 //Обработка ошибок последний middleware
 app.use(errorHandler)
 
@@ -22,14 +21,13 @@ app.use(errorHandler)
 const start = async () => {
     try {
         await sequelize.authenticate()
-        await sequelize.sync()
+        await sequelize.sync({force: true})
+            .then(() => console.log('Done'))
+            .catch((error) => console.error('Error', error))
         app.listen(PORT, () => console.log(`Сервер работает на порту ${PORT}`))
     } catch (e) {
         console.log(e)
     }
 }
 
-app.get('/', (req, res) => {
-    res.status(200).json({message: 'Работаем!!!'})
-})
 start().then(() => console.log('все супер пупер'))
