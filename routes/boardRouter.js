@@ -3,3 +3,5 @@ const router = new Router()
 const boardController = require('../controllers/boardController')
 
 router.get('/getAll', boardController.getAll)
+
+module.exports = router

@@ -13,6 +13,7 @@ const CategoriesRouter = require('./admin/CategoriesRouter')
 router.use('/user', userRouter)
 router.use('/ad', adRouter)
 router.use('/categories', CategoriesRouter)
+router.use('/board', boardRouter)
 
 
 module.exports = router
