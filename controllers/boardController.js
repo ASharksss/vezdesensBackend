@@ -20,13 +20,11 @@ class BoardController {
             if (subCategoryId && objectId) {
                 ads = await Ad.findAll({where: {subCategoryId, objectId}})
             }
-
             return res.json(ads)
         } catch (e) {
             return next(ApiError.badRequest(e.message))
         }
     }
-
 }
 
 module.exports = new BoardController()
