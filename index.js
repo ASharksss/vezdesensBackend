@@ -1,6 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const sequelize = require('./db')
+const models = require('./models')
 const cors = require('cors')
 const router = require('./routes/index')
 const errorHandler = require('./middleware/ErrorHandingMiddleware')
@@ -21,8 +22,7 @@ app.use(errorHandler)
 const start = async () => {
     try {
         await sequelize.authenticate()
-        await sequelize.sync({force: true})
-            .then(() => console.log('Done'))
+        await sequelize.sync().then(() => console.log('успешно'))
             .catch((error) => console.error('Error', error))
         app.listen(PORT, () => console.log(`Сервер работает на порту ${PORT}`))
     } catch (e) {

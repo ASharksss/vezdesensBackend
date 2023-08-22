@@ -4,11 +4,9 @@ const adController = require('../controllers/adController')
 
 
 
-router.post('/')
-router.get('/', (req, res) => {
-    res.json({message: 'Роутер объявлений'})
-})
 router.get('/:id')
-router.delete('/:id')
+router.post('/createAd', adController.createAd)
+
+
 
 module.exports = router

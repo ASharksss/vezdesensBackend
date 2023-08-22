@@ -1,11 +1,14 @@
 const ApiError = require("../error/ApiError");
+const {User} = require('../models')
 
 class UserController {
     async registration(req, res, next) {
         try {
-
-        }catch (e) {
-
+            const {name, email, phone, login, password} = req.body
+            const user = await User.create({name, email, phone, login, password})
+            return res.json(user)
+        } catch (e) {
+            return next(ApiError.badRequest(e.message))
         }
     }
 
