@@ -1,30 +1,80 @@
 const ApiError = require('../error/ApiError')
-const {Ad} = require('../models')
+const {Ad, Objects, SubCategory, Category} = require('../models')
 
 
 class BoardController {
 
-    async getAll(req, res, next) {
-        try {
-            const {subCategoryId, objectId} = req.query
-            let ads
-            if (!subCategoryId && !objectId) {
-                ads = await Ad.findAll()
+  async getAll(req, res, next) {
+    try {
+      const {subCategoryId, objectId} = req.query
+      let ads
+      if (!subCategoryId && !objectId) {
+        ads = await Ad.findAll({
+          include: [{
+            model: Objects,
+            include: [{
+              model: SubCategory,
+              include: Category
+            }]
+          }]
+        })
+      }
+      if (subCategoryId && !objectId) {
+        ads = await Ad.findAll({
+
+          include: [{
+            model: Objects,
+            where: {subCategoryId: subCategoryId},
+            include: [{
+              model: SubCategory,
+              include: Category
+            }]
+          }]
+        })
+      }
+      if (!subCategoryId && objectId) {
+        ads = await Ad.findAll({
+          where: {objectId: objectId},
+          include: [{
+            model: Objects,
+            include: [{
+              model: SubCategory,
+              include: Category
+            }]
+          }]
+        })
+      }
+
+
+
+      /*if (!subCategoryId && !objectId) {
+        ads = await Ad.findAll({
+            include: [{
+              model: Objects,
+              include: [{model: SubCategory}]
+            }]
+          }
+        )
+      }
+      if (subCategoryId && !objectId) {
+        ads = await Ad.findAll({
+          include: [{
+            model: Objects,
+            where: {
+              subCategoryId: subCategoryId
             }
-            if (subCategoryId && !objectId) {
-                ads = await Ad.findAll({where: subCategoryId})
-            }
-            if (!subCategoryId && objectId) {
-                ads = await Ad.findAll({where: objectId})
-            }
-            if (subCategoryId && objectId) {
-                ads = await Ad.findAll({where: {subCategoryId, objectId}})
-            }
-            return res.json(ads)
-        } catch (e) {
-            return next(ApiError.badRequest(e.message))
-        }
+          }]
+        })
+      }
+      if (!subCategoryId && objectId) {
+        ads = await Ad.findAll({where: objectId})
+      }*/
+
+      return res.json(ads)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
     }
+  }
 }
 
 module.exports = new BoardController()
