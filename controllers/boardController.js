@@ -5,9 +5,11 @@ const {Ad, Objects, SubCategory, Category} = require('../models')
 class BoardController {
 
   async getAll(req, res, next) {
+
     try {
       const {subCategoryId, objectId} = req.query
       let ads
+
       if (!subCategoryId && !objectId) {
         ads = await Ad.findAll({
           include: [{
@@ -19,6 +21,7 @@ class BoardController {
           }]
         })
       }
+
       if (subCategoryId && !objectId) {
         ads = await Ad.findAll({
 
@@ -32,6 +35,8 @@ class BoardController {
           }]
         })
       }
+
+
       if (!subCategoryId && objectId) {
         ads = await Ad.findAll({
           where: {objectId: objectId},
@@ -44,32 +49,6 @@ class BoardController {
           }]
         })
       }
-
-
-
-      /*if (!subCategoryId && !objectId) {
-        ads = await Ad.findAll({
-            include: [{
-              model: Objects,
-              include: [{model: SubCategory}]
-            }]
-          }
-        )
-      }
-      if (subCategoryId && !objectId) {
-        ads = await Ad.findAll({
-          include: [{
-            model: Objects,
-            where: {
-              subCategoryId: subCategoryId
-            }
-          }]
-        })
-      }
-      if (!subCategoryId && objectId) {
-        ads = await Ad.findAll({where: objectId})
-      }*/
-
       return res.json(ads)
     } catch (e) {
       return next(ApiError.badRequest(e.message))

@@ -46,8 +46,8 @@ class CategoriesController {
 
   async createCategories(req, res, next) {
     try {
-      const {category, subCategory, object} = req.body
-      const cat = await Category.create({category})
+      const {categoryName} = req.body
+      const cat = await Category.create({name: categoryName})
       return res.json(cat)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
