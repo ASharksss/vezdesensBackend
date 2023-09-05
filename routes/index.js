@@ -14,6 +14,7 @@ router.use('/user', userRouter)
 router.use('/ad', adRouter)
 router.use('/categories', CategoriesRouter)
 router.use('/board', boardRouter)
+router.use('/chat', chatRouter)
 
 
 module.exports = router

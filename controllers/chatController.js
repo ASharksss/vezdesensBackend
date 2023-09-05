@@ -17,6 +17,7 @@ const emitter = new events.EventEmitter()
     async addMessage(req, res, next) {
       try {
         const {message} = req.body
+        emitter.emit('newMessage', message)
         return res.json(message)
       } catch (e) {
         return next(ApiError.badRequest(e.message))
@@ -27,7 +28,7 @@ const emitter = new events.EventEmitter()
       try {
         const {idChat} = req.query
 
-        emitter.once('newMessages', () => {
+        emitter.once('newMessages', (message) => {
           res.json(message)
         })
 
@@ -35,6 +36,7 @@ const emitter = new events.EventEmitter()
         return next(ApiError.badRequest(e.message))
       }
     }
-
-
   }
+
+
+  module.exports = new chatController()
