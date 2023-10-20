@@ -1,5 +1,5 @@
 const ApiError = require('../error/ApiError')
-const {Ad, Objects, SubCategory, Category} = require('../models')
+const {Ad, Objects, SubCategory, Category, TypeAd} = require('../models')
 
 
 class BoardController {
@@ -9,7 +9,6 @@ class BoardController {
     try {
       const {subCategoryId, objectId} = req.query
       let ads
-
       if (!subCategoryId && !objectId) {
         ads = await Ad.findAll({
           include: [{
@@ -18,13 +17,15 @@ class BoardController {
               model: SubCategory,
               include: Category
             }]
-          }]
+          },
+            {
+            model: TypeAd
+          },
+          ]
         })
       }
-
       if (subCategoryId && !objectId) {
         ads = await Ad.findAll({
-
           include: [{
             model: Objects,
             where: {subCategoryId: subCategoryId},
@@ -32,11 +33,12 @@ class BoardController {
               model: SubCategory,
               include: Category
             }]
-          }]
+          },
+            {
+              model: TypeAd
+            },]
         })
       }
-
-
       if (!subCategoryId && objectId) {
         ads = await Ad.findAll({
           where: {objectId: objectId},
@@ -46,7 +48,10 @@ class BoardController {
               model: SubCategory,
               include: Category
             }]
-          }]
+          },
+            {
+              model: TypeAd
+            }]
         })
       }
       return res.json(ads)

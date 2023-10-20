@@ -52,13 +52,11 @@ const Role = sequelize.define('role', {
 })
 
 const Chat = sequelize.define('chat', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
-const MessageChat = sequelize.define('messageChat', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  text: {type: DataTypes.STRING, primaryKey: true},
+const UserChat = sequelize.define('userChat', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
 //Relationships
@@ -67,10 +65,19 @@ const MessageChat = sequelize.define('messageChat', {
 User.hasMany(Ad)
 Ad.belongsTo(User)
 
-TypeAd.hasMany(Ad)
+TypeAd.hasMany(Ad, {
+  foreignKey: {
+    defaultValue: 1,
+    allowNull: false
+  }
+})
 Ad.belongsTo(TypeAd)
 
-StatusAd.hasMany(Ad)
+StatusAd.hasMany(Ad, {
+  foreignKey: {
+    defaultValue: 2
+  }
+})
 Ad.belongsTo(StatusAd)
 
 Objects.hasMany(Ad)
@@ -88,11 +95,13 @@ SubCategory.belongsTo(Category)
 Ad.hasMany(Chat)
 Chat.belongsTo(Ad)
 
-User.hasMany(MessageChat)
-MessageChat.belongsTo(User)
+User.hasMany(Chat)
+Chat.belongsTo(User)
 
+Chat.hasMany(UserChat)
+UserChat.belongsTo(Chat)
 
 module.exports = {
-  Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, MessageChat
+  Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat
 }
 
