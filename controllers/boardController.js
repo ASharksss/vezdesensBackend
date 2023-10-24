@@ -14,6 +14,9 @@ class BoardController {
     //Проверка на категорию
       if (!subCategoryId && !objectId) {
         ads = await Ad.findAll({
+          where: {
+            [sequelize.and]: [{statusAdId: 1},{statusAdId: 2}]
+          },
           include: [{
             model: Objects,
             include: [{

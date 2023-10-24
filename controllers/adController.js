@@ -57,7 +57,8 @@ class AdController {
         ad = await Ad.create({
           title, price, description,
           address, longevity, userId,
-          typeAdId, statusAdId, objectId
+          typeAdId, statusAdId, objectId,
+          dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
       }
       return res.json(ad);
