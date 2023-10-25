@@ -74,12 +74,13 @@ class AdController {
       }]
     })
 
-    const viewsCount = await AdView.findAndCountAll({
+    //Получение просмотров по объявлению
+    const viewsOfAd = await AdView.findAndCountAll({
       where: {adId}
     })
 
-
-
+    //Количество просмотров
+    const viewsCount = viewsOfAd.count
 
     //Все просмотры по объявлению
     const tableViews = await AdView.findOne({
@@ -96,7 +97,7 @@ class AdController {
        })
        view.save()
      }
-    return res.json(ad)
+    return res.json({ad, viewsCount})
   }
 
   async editAd(req, res) {
