@@ -1,6 +1,6 @@
 const ApiError = require("../error/ApiError");
-const {Ad, Category, SubCategory, Objects, TypeAd, Booking} = require('../models')
-const {INTEGER} = require("sequelize");
+const {Ad, Category, SubCategory, Objects, TypeAd, Booking, AdView, } = require('../models')
+const {Op} = require("sequelize");
 
 class AdController {
 
@@ -9,17 +9,10 @@ class AdController {
     try {
 
       const {
-        title,
-        price,
-        description,
-        address,
-        longevity,
-        userId,
-        typeAdId,
-        statusAdId,
-        objectId,
-        bookingDateStart,
-        bookingDateEnd
+        title, price, description,
+        address, longevity, userId,
+        typeAdId, statusAdId, objectId,
+        bookingDateStart, bookingDateEnd
       } = req.body
 
       console.log(bookingDateStart, bookingDateEnd)
@@ -45,37 +38,21 @@ class AdController {
 
         //Создаем объявление
         ad = await Ad.create({
-          title,
-          price,
-          description,
-          address,
-          longevity,
-          userId,
-          typeAdId,
-          statusAdId,
-          objectId,
+          title, price, description,
+          address, longevity, userId,
+          typeAdId, statusAdId, objectId,
           dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
-
         //Запись бронирования
         booking = await Booking.create({
           userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost
         })
-
-
       } else {
-
         //Создаем объявление без брони
         ad = await Ad.create({
-          title,
-          price,
-          description,
-          address,
-          longevity,
-          userId,
-          typeAdId,
-          statusAdId,
-          objectId,
+          title, price, description,
+          address, longevity, userId,
+          typeAdId, statusAdId, objectId,
           dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
       }
@@ -83,6 +60,32 @@ class AdController {
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
+  }
+
+  async getOneAd(req, res) {
+    const {adId, userId} = req.query
+    let view
+
+    //Достаем объявление
+    const ad = await Ad.findOne({
+      where: [{id: adId}]
+    })
+
+    //Все просмотры по объявлению
+    const tableViews = await AdView.findOne({
+      where: {
+        [Op.and]: [{adId, userId}]
+      }
+    })
+
+    //Если совпадение не найдено - создаем
+     if (!tableViews) {
+       view = await AdView.create({
+         userId,
+         adId
+       })
+     }
+    return res.json(ad)
   }
 
   async editAd(req, res) {
@@ -93,13 +96,6 @@ class AdController {
 
   }
 
-  async checkTypeAd(req, res) {
-    try {
-
-    } catch (e) {
-
-    }
-  }
 
 }
 

@@ -46,6 +46,10 @@ const Booking = sequelize.define('booking', {
   isActive: {type: DataTypes.BOOLEAN, defaultValue: true}
 })
 
+const AdView = sequelize.define('adView', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+})
+
 const User = sequelize.define('user', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING},
@@ -108,6 +112,13 @@ Objects.belongsTo(SubCategory)
 Category.hasMany(SubCategory)
 SubCategory.belongsTo(Category)
 
+//Просмотры
+Ad.hasMany(AdView)
+AdView.belongsTo(Ad)
+
+User.hasMany(AdView)
+AdView.belongsTo(User)
+
 //Чат
 Ad.hasMany(Chat)
 Chat.belongsTo(Ad)
@@ -119,6 +130,6 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
-  Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+ AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
 }
 

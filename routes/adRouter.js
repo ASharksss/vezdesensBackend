@@ -4,7 +4,8 @@ const adController = require('../controllers/adController')
 
 
 
-router.get('/:id')
+router.get('/getOneAd', adController.getOneAd)
+
 
 router.post('/createAd', adController.createAd)
 
