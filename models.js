@@ -50,6 +50,10 @@ const AdView = sequelize.define('adView', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
 })
 
+const Favorite = sequelize.define('favorite', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+})
+
 const User = sequelize.define('user', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING},
@@ -119,6 +123,13 @@ AdView.belongsTo(Ad)
 User.hasMany(AdView)
 AdView.belongsTo(User)
 
+//Избранное
+Ad.hasMany(Favorite)
+Favorite.belongsTo(Ad)
+
+User.hasMany(Favorite)
+Favorite.belongsTo(User)
+
 //Чат
 Ad.hasMany(Chat)
 Chat.belongsTo(Ad)
@@ -130,6 +141,6 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
- AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+  Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
 }
 

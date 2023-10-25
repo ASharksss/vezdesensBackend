@@ -1,5 +1,5 @@
 const ApiError = require("../error/ApiError");
-const {Ad, Category, SubCategory, Objects, TypeAd, Booking, AdView, } = require('../models')
+const {Ad, Category, SubCategory, Objects, TypeAd, Booking, AdView, Favorite,} = require('../models')
 const {Op} = require("sequelize");
 
 class AdController {
@@ -90,14 +90,22 @@ class AdController {
     })
 
     //Если совпадение не найдено - создаем
-     if (!tableViews) {
-       view = await AdView.create({
-         userId,
-         adId
-       })
-       view.save()
-     }
+    if (!tableViews) {
+      view = await AdView.create({
+        userId,
+        adId
+      })
+      view.save()
+    }
     return res.json({ad, viewsCount})
+  }
+
+  async inFavorite(req, res) {
+    const {adId, userId} = req.query
+    const favoritesOfUser = await Favorite.findOrCreate({
+      where: {adId, userId}
+    })
+    return res.json(favoritesOfUser)
   }
 
   async editAd(req, res) {

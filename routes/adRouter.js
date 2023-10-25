@@ -5,6 +5,7 @@ const adController = require('../controllers/adController')
 
 
 router.get('/getOneAd', adController.getOneAd)
+router.get('/inFavorite', adController.inFavorite)
 
 
 router.post('/createAd', adController.createAd)
