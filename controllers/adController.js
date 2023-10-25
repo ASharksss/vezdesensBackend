@@ -9,15 +9,25 @@ class AdController {
     try {
 
       const {
-        title, price, description,
-        address, longevity, userId,
-        typeAdId, statusAdId, objectId,
-        bookingDateStart, bookingDateEnd
+        title,
+        price,
+        description,
+        address,
+        longevity,
+        userId,
+        typeAdId,
+        statusAdId,
+        objectId,
+        bookingDateStart,
+        bookingDateEnd
       } = req.body
+
+      console.log(bookingDateStart, bookingDateEnd)
 
       let priceTypeAd, ad, time, cost, booking
       const currentDate = new Date()
 
+      //Бронирование дорогих плашек
       if (typeAdId === 2 || typeAdId === 3 || typeAdId === 4) {
 
         //Вытаскиваем стоимость за 1 день
@@ -30,6 +40,8 @@ class AdController {
 
         //Определяем стоимость бронирования
         cost = time * priceTypeAd.price
+
+        //Тут функция оплаты
 
         //Создаем объявление
         ad = await Ad.create({
@@ -47,17 +59,23 @@ class AdController {
 
         //Запись бронирования
         booking = await Booking.create({
-          userId, typeAdId, adId: ad.id,
-          dateStart: bookingDateStart,
-          dateEnd: bookingDateEnd, cost
+          userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost
         })
+
+
       } else {
 
-        //Создаем объявление
+        //Создаем объявление без брони
         ad = await Ad.create({
-          title, price, description,
-          address, longevity, userId,
-          typeAdId, statusAdId, objectId,
+          title,
+          price,
+          description,
+          address,
+          longevity,
+          userId,
+          typeAdId,
+          statusAdId,
+          objectId,
           dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
       }

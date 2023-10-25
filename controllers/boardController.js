@@ -1,5 +1,6 @@
 const ApiError = require('../error/ApiError')
 const {Ad, Objects, SubCategory, Category, TypeAd, User} = require('../models')
+const {Op} = require("sequelize");
 
 
 class BoardController {
@@ -11,11 +12,11 @@ class BoardController {
       let ads
       const currentDate = new Date()
 
-    //Проверка на категорию
+      //Проверка на категорию
       if (!subCategoryId && !objectId) {
         ads = await Ad.findAll({
           where: {
-            [sequelize.and]: [{statusAdId: 1},{statusAdId: 2}]
+            [Op.or]: [{ statusAdId: 1 },{ statusAdId: 2 }]
           },
           include: [{
             model: Objects,
@@ -41,7 +42,10 @@ class BoardController {
         ads = await Ad.findAll({
           include: [{
             model: Objects,
-            where: {subCategoryId: subCategoryId},
+            where: [
+              {subCategoryId: subCategoryId},
+              {[Op.or]: [{statusAdId: 1},{statusAdId: 2}]}
+            ],
             include: [{
               model: SubCategory,
               include: Category
@@ -61,7 +65,10 @@ class BoardController {
 
       if (!subCategoryId && objectId) {
         ads = await Ad.findAll({
-          where: {objectId: objectId},
+          where: [
+            {objectId: objectId},
+            {[Op.or]: [{statusAdId: 1},{statusAdId: 2}]}
+          ],
           include: [{
             model: Objects,
             include: [{
@@ -79,10 +86,8 @@ class BoardController {
             ads[i].statusAdId = 3
             ads[i].save()
           }
-
         }
       }
-
       return res.json(ads)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
