@@ -68,8 +68,18 @@ class AdController {
 
     //Достаем объявление
     const ad = await Ad.findOne({
-      where: [{id: adId}]
+      where: [{id: adId}],
+      include: [{
+        model: AdView
+      }]
     })
+
+    const viewsCount = await AdView.findAndCountAll({
+      where: {adId}
+    })
+
+
+
 
     //Все просмотры по объявлению
     const tableViews = await AdView.findOne({
@@ -84,6 +94,7 @@ class AdController {
          userId,
          adId
        })
+       view.save()
      }
     return res.json(ad)
   }
