@@ -46,6 +46,24 @@ const Booking = sequelize.define('booking', {
   isActive: {type: DataTypes.BOOLEAN, defaultValue: true}
 })
 
+const Characteristic = sequelize.define('characteristic', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
+const CharacteristicValue = sequelize.define('characteristicValue', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true},
+  name: {type: DataTypes.STRING}
+})
+
+const CharacteristicObject = sequelize.define('characteristicObject', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true}
+})
+
+const CharacteristicSubCategory = sequelize.define('characteristicSubCategory', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true}
+})
+
 const AdView = sequelize.define('adView', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
 })
@@ -100,6 +118,7 @@ Ad.belongsTo(StatusAd)
 Objects.hasMany(Ad)
 Ad.belongsTo(Objects)
 
+//Бронирование типов объявления
 Ad.hasMany(Booking)
 Booking.belongsTo(Ad)
 
@@ -115,6 +134,24 @@ Objects.belongsTo(SubCategory)
 
 Category.hasMany(SubCategory)
 SubCategory.belongsTo(Category)
+
+//Характеристики
+Characteristic.hasMany(CharacteristicValue)
+CharacteristicValue.belongsTo(Characteristic)
+
+Characteristic.hasMany(CharacteristicObject)
+CharacteristicObject.belongsTo(Characteristic)
+
+Characteristic.hasMany(CharacteristicSubCategory)
+CharacteristicSubCategory.belongsTo(Characteristic)
+
+
+Objects.hasMany(CharacteristicObject)
+CharacteristicObject.belongsTo(Objects)
+
+SubCategory.hasMany(CharacteristicSubCategory)
+CharacteristicSubCategory.belongsTo(SubCategory)
+
 
 //Просмотры
 Ad.hasMany(AdView)
@@ -141,6 +178,6 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
-  Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+  CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
 }
 

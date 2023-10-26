@@ -22,7 +22,7 @@ app.use(errorHandler)
 const start = async () => {
   try {
     await sequelize.authenticate()
-    await sequelize.sync().then(() => console.log('успешно'))
+    await sequelize.sync({alter: true}).then(() => console.log('успешно'))
       .catch((error) => console.error('Error', error))
     app.listen(PORT, () => console.log(`Сервер работает на порту ${PORT}`))
   } catch (e) {

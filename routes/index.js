@@ -3,16 +3,18 @@ const router = new Router()
 
 
 const adRouter = require('./adRouter')
-const boardRouter  = require('./boardRouter')
+const boardRouter = require('./boardRouter')
 const chatRouter = require('./chatRouter')
 const geoRouter = require('./geoRouter')
 const userRouter = require('./userRouter')
-const CategoriesRouter = require('./CategoriesRouter')
+const CategoriesRouter = require('./admin/CategoriesRouter')
+const characteristicRouter = require('./admin/CharacteristicRouter')
 
 
 router.use('/user', userRouter)
 router.use('/ad', adRouter)
 router.use('/categories', CategoriesRouter)
+router.use('/characteristic', characteristicRouter)
 router.use('/board', boardRouter)
 router.use('/chat', chatRouter)
 
