@@ -48,20 +48,29 @@ const Booking = sequelize.define('booking', {
 
 const Characteristic = sequelize.define('characteristic', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  name: {type: DataTypes.STRING}
+  name: {type: DataTypes.STRING, unique: true}
 })
 
 const CharacteristicValue = sequelize.define('characteristicValue', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true},
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
 })
 
 const CharacteristicObject = sequelize.define('characteristicObject', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
 const CharacteristicSubCategory = sequelize.define('characteristicSubCategory', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoincrement: true}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
+})
+
+const AdCharacteristicInput = sequelize.define('adCharacteristicInput', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  value: {type: DataTypes.STRING}
+})
+
+const AdCharacteristicSelect = sequelize.define('adCharacteristicSelect', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
 const AdView = sequelize.define('adView', {
@@ -135,16 +144,16 @@ Objects.belongsTo(SubCategory)
 Category.hasMany(SubCategory)
 SubCategory.belongsTo(Category)
 
-//Характеристики
+//Характеристики - Значения
 Characteristic.hasMany(CharacteristicValue)
 CharacteristicValue.belongsTo(Characteristic)
 
+//Характеристики для определнных категорий
 Characteristic.hasMany(CharacteristicObject)
 CharacteristicObject.belongsTo(Characteristic)
 
 Characteristic.hasMany(CharacteristicSubCategory)
 CharacteristicSubCategory.belongsTo(Characteristic)
-
 
 Objects.hasMany(CharacteristicObject)
 CharacteristicObject.belongsTo(Objects)
@@ -152,6 +161,24 @@ CharacteristicObject.belongsTo(Objects)
 SubCategory.hasMany(CharacteristicSubCategory)
 CharacteristicSubCategory.belongsTo(SubCategory)
 
+
+//Характеристики - Объявления (ввод)
+Ad.hasMany(AdCharacteristicInput)
+AdCharacteristicInput.belongsTo(Ad)
+
+Characteristic.hasMany(AdCharacteristicInput)
+AdCharacteristicInput.belongsTo(Characteristic)
+
+
+//Характеристики - Объявления (выбор)
+Ad.hasMany(AdCharacteristicSelect)
+AdCharacteristicSelect.belongsTo(Ad)
+
+Characteristic.hasMany(AdCharacteristicSelect)
+AdCharacteristicSelect.belongsTo(Characteristic)
+
+CharacteristicValue.hasMany(AdCharacteristicSelect)
+AdCharacteristicSelect.belongsTo(CharacteristicValue)
 
 //Просмотры
 Ad.hasMany(AdView)
@@ -178,6 +205,6 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
-  CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+  AdCharacteristicInput, AdCharacteristicSelect,CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
 }
 

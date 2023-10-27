@@ -4,5 +4,12 @@ const characteristicController = require('../../controllers/admin/characteristic
 
 
 router.post('/createCharacteristic', characteristicController.createCharacteristic)
+router.post('/createCharacteristicValue', characteristicController.createCharacteristicValue)
+router.post('/createCharacteristicObject', characteristicController.createCharacteristicObject)
+router.post('/createCharacteristicSubCategory', characteristicController.createCharacteristicSubCategory)
+
+
+router.get('/getCharacteristicObject', characteristicController.getCharacteristicObject)
+
 
 module.exports = router
