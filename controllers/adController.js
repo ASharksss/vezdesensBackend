@@ -1,8 +1,19 @@
 const ApiError = require("../error/ApiError");
-const {Ad, Category, SubCategory, Objects, TypeAd, Booking, AdView, Favorite,} = require('../models')
+const {
+  Ad,
+  Category,
+  SubCategory,
+  Objects,
+  TypeAd,
+  Booking,
+  AdView,
+  Favorite,
+  CharacteristicObject, CharacteristicSubCategory, Characteristic, CharacteristicValue, TypeCharacteristic,
+} = require('../models')
 const {Op} = require("sequelize");
 
 class AdController {
+
 
 
   async createAd(req, res, next) {
@@ -15,7 +26,8 @@ class AdController {
         bookingDateStart, bookingDateEnd
       } = req.body
 
-      console.log(bookingDateStart, bookingDateEnd)
+
+
 
       let priceTypeAd, ad, time, cost, booking
       const currentDate = new Date()
@@ -56,7 +68,7 @@ class AdController {
           dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
       }
-      return res.json(ad);
+      return res.json({ad, characteristics});
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

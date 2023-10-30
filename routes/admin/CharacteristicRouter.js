@@ -7,6 +7,8 @@ router.post('/createCharacteristic', characteristicController.createCharacterist
 router.post('/createCharacteristicValue', characteristicController.createCharacteristicValue)
 router.post('/createCharacteristicObject', characteristicController.createCharacteristicObject)
 router.post('/createCharacteristicSubCategory', characteristicController.createCharacteristicSubCategory)
+router.post('/unionAdCharacterInput', characteristicController.unionAdCharacterInput)
+router.post('/unionAdCharacterSelect', characteristicController.unionAdCharacterSelect)
 
 
 router.get('/getCharacteristicObject', characteristicController.getCharacteristicObject)

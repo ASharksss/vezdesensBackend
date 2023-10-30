@@ -1,5 +1,11 @@
 const ApiError = require('../../error/ApiError')
-const {Characteristic, CharacteristicValue, CharacteristicObject, Objects, CharacteristicSubCategory} = require("../../models");
+const {
+  Characteristic,
+  CharacteristicValue,
+  CharacteristicObject,
+  Objects,
+  CharacteristicSubCategory, TypeCharacteristic, AdCharacteristicInput
+} = require("../../models");
 
 class CharacteristicController {
 
@@ -57,7 +63,7 @@ class CharacteristicController {
         include: [{model: Characteristic, include: {model: CharacteristicValue}, attributes: ['name']}]
       })
       return res.json(characteristicSubCategory)
-    }catch (e) {
+    } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
   }
@@ -68,10 +74,13 @@ class CharacteristicController {
     try {
       const {objectId} = req.query
       const characteristicObject = await CharacteristicObject.findAll({
-        where: {
-          objectId
-        },
-        include: [{model: Characteristic, include: {model: CharacteristicValue}, attributes: ['name']}]
+        where: {objectId},
+        attributes: ['characteristicId', 'objectId'],
+        include: [{
+          model: Characteristic,
+          include: [{model: CharacteristicValue}, {model: TypeCharacteristic}],
+          attributes: ['name']
+        },]
       })
       return res.json(characteristicObject)
     } catch (e) {
@@ -79,6 +88,25 @@ class CharacteristicController {
     }
   }
 
+  async unionAdCharacterInput(req, res, next) {
+    try {
+      const {adId, characteristicId, value} = req.body
+      const adCharacteristic = await AdCharacteristicInput.create({adId, characteristicId, value})
+      return res.json(adCharacteristic)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async unionAdCharacterSelect(req, res, next) {
+    try {
+      const {adId, characteristicId, characteristicValueId} = req.body
+      const adCharacteristic = await unionAdCharacterSelect.create({adId, characteristicId, characteristicValueId})
+      return res.json(adCharacteristic)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
 }
 
 module.exports = new CharacteristicController()

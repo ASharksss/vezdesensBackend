@@ -51,6 +51,11 @@ const Characteristic = sequelize.define('characteristic', {
   name: {type: DataTypes.STRING, unique: true}
 })
 
+const TypeCharacteristic = sequelize.define('typeCharacteristic', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING, unique: true}
+})
+
 const CharacteristicValue = sequelize.define('characteristicValue', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
@@ -148,6 +153,9 @@ SubCategory.belongsTo(Category)
 Characteristic.hasMany(CharacteristicValue)
 CharacteristicValue.belongsTo(Characteristic)
 
+TypeCharacteristic.hasMany(Characteristic)
+Characteristic.belongsTo(TypeCharacteristic)
+
 //Характеристики для определнных категорий
 Characteristic.hasMany(CharacteristicObject)
 CharacteristicObject.belongsTo(Characteristic)
@@ -205,6 +213,6 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
-  AdCharacteristicInput, AdCharacteristicSelect,CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+  TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
 }
 
