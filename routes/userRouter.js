@@ -4,8 +4,10 @@ const userController = require('../controllers/userController')
 
 
 router.get('/auth', userController.check)
+router.get('/getOneUser', userController.getOneUser)
 router.post('/registration', userController.registration)
 router.post('/login', userController.login)
+router.post('/review', userController.review)
 
 
 router.get('/:id')

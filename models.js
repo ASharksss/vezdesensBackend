@@ -102,6 +102,8 @@ const Role = sequelize.define('role', {
 
 const Rating = sequelize.define('rating', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  customerId: {type: DataTypes.INTEGER, allowNull: false, foreignKey: true},
+  sellerId: {type: DataTypes.INTEGER, allowNull: false, foreignKey: true},
   grade: {type: DataTypes.INTEGER, allowNull: false},
   text: {type: DataTypes.STRING, allowNull: false}
 })
@@ -209,12 +211,18 @@ User.hasMany(Favorite)
 Favorite.belongsTo(User)
 
 //Рейтинг
+User.hasMany(Rating, {
+  foreignKey: 'customerId'
+})
 Rating.belongsTo(User, {
-  as: 'customer'
+  foreignKey: 'customerId'
 })
 
+User.hasMany(Rating, {
+  foreignKey: 'sellerId'
+})
 Rating.belongsTo(User, {
-  as: 'seller'
+  foreignKey: 'customerId'
 })
 
 //Чат
