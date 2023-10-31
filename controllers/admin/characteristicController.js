@@ -78,7 +78,7 @@ class CharacteristicController {
         attributes: ['characteristicId', 'objectId'],
         include: [{
           model: Characteristic,
-          include: [{model: CharacteristicValue}, {model: TypeCharacteristic}],
+          include: [{model: CharacteristicValue, attributes: ['id','name']}, {model: TypeCharacteristic, attributes: ['name']}],
           attributes: ['name']
         },]
       })

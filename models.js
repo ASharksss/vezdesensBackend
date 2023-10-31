@@ -100,6 +100,12 @@ const Role = sequelize.define('role', {
   name: {type: DataTypes.STRING, allowNull: false},
 })
 
+const Rating = sequelize.define('rating', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  grade: {type: DataTypes.INTEGER, allowNull: false},
+  text: {type: DataTypes.STRING, allowNull: false}
+})
+
 const Chat = sequelize.define('chat', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
@@ -202,6 +208,15 @@ Favorite.belongsTo(Ad)
 User.hasMany(Favorite)
 Favorite.belongsTo(User)
 
+//Рейтинг
+Rating.belongsTo(User, {
+  as: 'customer'
+})
+
+Rating.belongsTo(User, {
+  as: 'seller'
+})
+
 //Чат
 Ad.hasMany(Chat)
 Chat.belongsTo(Ad)
@@ -213,6 +228,25 @@ Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
 module.exports = {
-  TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,CharacteristicSubCategory, CharacteristicObject, Characteristic, CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects, Role, Category, SubCategory, User, Chat, Booking
+  Rating,
+  TypeCharacteristic,
+  AdCharacteristicInput,
+  AdCharacteristicSelect,
+  CharacteristicSubCategory,
+  CharacteristicObject,
+  Characteristic,
+  CharacteristicValue,
+  Favorite,
+  AdView,
+  Ad,
+  TypeAd,
+  StatusAd,
+  Objects,
+  Role,
+  Category,
+  SubCategory,
+  User,
+  Chat,
+  Booking
 }
 
