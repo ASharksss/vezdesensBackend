@@ -63,8 +63,6 @@ class AdController {
             value: item.value
           })
         })
-
-
         //Запись характеристик Checkbox
         characteristicsSelect.map(async (item) => {
           //Проверка Checkbox или Radio
@@ -105,6 +103,42 @@ class AdController {
           typeAdId, statusAdId, objectId,
           dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
         })
+
+        //Запись характеристик enter
+        characteristicsInput.map(async (item) => {
+          characterInput = await AdCharacteristicInput.create({
+            adId: ad.id,
+            characteristicId: item.characteristicId,
+            value: item.value
+          })
+        })
+        //Запись характеристик Checkbox
+        characteristicsSelect.map(async (item) => {
+          //Проверка Checkbox или Radio
+          let checkNumber = Number.isInteger(item.value)
+          //Radio
+          if (checkNumber) {
+            characterSelect = await AdCharacteristicSelect.create({
+              adId: ad.Id,
+              characteristicId: item.characteristicId,
+              valueId: item.value
+            })
+          } else {
+            //Checkbox
+            item.value.map(async (value) => {
+              try {
+                characterSelect = await AdCharacteristicSelect.create({
+                  adId: ad.Id,
+                  characteristicId: item.characteristicId,
+                  valueId: value
+                })
+              } catch (e) {
+                return next(ApiError.badRequest(e.message))
+              }
+            })
+          }
+        })
+
       }
       return res.json({ad, characteristics});
     } catch (e) {
