@@ -1,5 +1,5 @@
 const ApiError = require("../error/ApiError");
-const {User, Rating} = require('../models')
+const {User, Rating, Ad} = require('../models')
 
 class UserController {
 
@@ -40,9 +40,7 @@ class UserController {
       const {userId} = req.query
       let user = await User.findAll({
         where: {id: userId},
-        include: {
-          model: Rating, where: {sellerId: userId}
-        }
+        include: [{model: Rating, where: {sellerId: userId}}, {model: Ad, where: {userId}}]
       })
 
       return res.json(user)
