@@ -5,8 +5,10 @@ const userController = require('../controllers/userController')
 
 router.get('/auth', userController.check)
 router.get('/getOneUser/:id', userController.getOneUser)
-router.post('/registration', userController.registration)
+router.get('/getArchiveAds/:id', userController.getArchiveAds)
+
 router.post('/login', userController.login)
+router.post('/registration', userController.registration)
 router.post('/review', userController.review)
 
 

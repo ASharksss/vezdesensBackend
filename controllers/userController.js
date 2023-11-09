@@ -1,5 +1,5 @@
 const ApiError = require("../error/ApiError");
-const {User, Rating, Ad, Favorite} = require('../models')
+const {User, Rating, Ad, Favorite, StatusAd, TypeAd} = require('../models')
 
 class UserController {
 
@@ -39,13 +39,31 @@ class UserController {
     try {
       const id = req.params.id
       let user = await User.findOne({
-        where: {id}
+        where: {id},
+        include: {
+          model: Ad, include: [{model: TypeAd}]
+        }
       })
       return res.json(user)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
   }
+
+  async getArchiveAds(req, res, next) {
+    try {
+      const id = req.params.id
+      let user = await Ad.findOne({
+        where: [{userId: id}, {statusAdId: 4}]
+      })
+      return res.json(user)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
 }
+
+
 
 module.exports = new UserController()
