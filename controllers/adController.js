@@ -9,7 +9,7 @@ const {
   AdView,
   Favorite,
   CharacteristicObject, CharacteristicSubCategory, Characteristic, CharacteristicValue, TypeCharacteristic,
-  AdCharacteristicInput, AdCharacteristicSelect,
+  AdCharacteristicInput, AdCharacteristicSelect, User,
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -146,17 +146,21 @@ class AdController {
     }
   }
 
-  async getOneAd(req, res) {
+  async getOneAd(req, res, next) {
     try {
-      const {adId, userId} = req.query
+
+      const adId = req.params.id
+
+      /*const {adId, userId} = req.query*/
       let view
 
       //Достаем объявление
       const ad = await Ad.findOne({
         where: [{id: adId}],
-        include: [{
-          model: AdView
-        }]
+
+        include: [
+          {model: AdView}, {model: User}
+        ]
       })
 
       //Получение просмотров по объявлению
@@ -164,9 +168,10 @@ class AdController {
         where: {adId}
       })
 
+
       //Количество просмотров
       const viewsCount = viewsOfAd.count
-
+/*
       //Все просмотры по объявлению
       const tableViews = await AdView.findOne({
         where: {
@@ -181,8 +186,8 @@ class AdController {
           adId
         })
         view.save()
-      }
-      return res.json({ad, viewsCount})
+      }*/
+      return res.json({ad,viewsCount})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

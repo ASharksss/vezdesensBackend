@@ -4,7 +4,7 @@ const adController = require('../controllers/adController')
 
 
 
-router.get('/getOneAd', adController.getOneAd)
+router.get('/getOneAd/:id', adController.getOneAd)
 router.get('/inFavorite', adController.inFavorite)
 
 
