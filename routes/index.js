@@ -13,7 +13,7 @@ const auth = require('../middleware/AuthHandingMiddleware')
 
 
 router.use('/user', userRouter)
-router.use('/ad', adRouter)
+router.use('/ad', auth.isAuthorized, adRouter)
 router.use('/categories', CategoriesRouter)
 router.use('/characteristic', characteristicRouter)
 router.use('/board', boardRouter)

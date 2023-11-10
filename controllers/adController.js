@@ -148,10 +148,9 @@ class AdController {
 
   async getOneAd(req, res, next) {
     try {
-
       const adId = req.params.id
+      const userId = req.user
 
-      /*const {adId, userId} = req.query*/
       let view
 
       //Достаем объявление
@@ -159,7 +158,7 @@ class AdController {
         where: [{id: adId}],
 
         include: [
-          {model: AdView}, {model: User}, {model: Rating}
+          {model: AdView}, {model: User}
         ]
       })
 
@@ -167,11 +166,9 @@ class AdController {
       const viewsOfAd = await AdView.findAndCountAll({
         where: {adId}
       })
-
-
       //Количество просмотров
       const viewsCount = viewsOfAd.count
-/*
+
       //Все просмотры по объявлению
       const tableViews = await AdView.findOne({
         where: {
@@ -186,8 +183,11 @@ class AdController {
           adId
         })
         view.save()
-      }*/
-      return res.json({ad,viewsCount})
+      }
+
+      await Ad.update({views: viewsCount}, {where: {id: adId}})
+
+      return res.json({ad, viewsCount})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
