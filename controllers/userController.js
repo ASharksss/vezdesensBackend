@@ -41,7 +41,7 @@ class UserController {
       let user = await User.findOne({
         where: {id},
         include: {
-          model: Ad, include: [{model: TypeAd}]
+          model: Ad, include: [{model: TypeAd}, {model: StatusAd}]
         }
       })
       return res.json(user)

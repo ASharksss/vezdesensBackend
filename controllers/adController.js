@@ -9,7 +9,7 @@ const {
   AdView,
   Favorite,
   CharacteristicObject, CharacteristicSubCategory, Characteristic, CharacteristicValue, TypeCharacteristic,
-  AdCharacteristicInput, AdCharacteristicSelect, User,
+  AdCharacteristicInput, AdCharacteristicSelect, User, Rating,
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -159,7 +159,7 @@ class AdController {
         where: [{id: adId}],
 
         include: [
-          {model: AdView}, {model: User}
+          {model: AdView}, {model: User}, {model: Rating}
         ]
       })
 
