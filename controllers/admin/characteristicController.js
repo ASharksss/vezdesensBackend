@@ -88,6 +88,24 @@ class CharacteristicController {
     }
   }
 
+  async getCharacteristicSubCategory(req, res, next) {
+    try {
+      const {subCategoryId} = req.query
+      const characteristicSubCategory = await CharacteristicSubCategory.findAll({
+        where: {subCategoryId},
+        attributes: ['characteristicId', 'subCategoryId'],
+        include: [{
+          model: Characteristic,
+          include: [{model: CharacteristicValue, attributes: ['id','name']}, {model: TypeCharacteristic, attributes: ['name']}],
+          attributes: ['name']
+        },]
+      })
+      return res.json(characteristicSubCategory)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async unionAdCharacterInput(req, res, next) {
     try {
       const {adId, characteristicId, value} = req.body

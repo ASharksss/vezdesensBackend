@@ -12,6 +12,7 @@ router.post('/unionAdCharacterSelect', characteristicController.unionAdCharacter
 
 
 router.get('/getCharacteristicObject', characteristicController.getCharacteristicObject)
+router.get('/getCharacteristicSubCategory', characteristicController.getCharacteristicSubCategory)
 
 
 module.exports = router
