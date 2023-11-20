@@ -141,6 +141,24 @@ class UserController {
       return next(ApiError.badRequest(e.message))
     }
   }
+  async getFavorite(req, res, next) {
+    try {
+      const userId = req.user
+      if (userId === null || userId === undefined) {
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+      let favorite = await Favorite.findAll({
+        where: {userId},
+        include: {
+          model: Ad,
+          include: [{model: StatusAd}, {model: Objects}]
+        }
+      })
+      return res.json(favorite)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
 
 }
 

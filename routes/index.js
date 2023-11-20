@@ -9,6 +9,7 @@ const geoRouter = require('./geoRouter')
 const userRouter = require('./userRouter')
 const CategoriesRouter = require('./admin/CategoriesRouter')
 const characteristicRouter = require('./admin/CharacteristicRouter')
+const otherRouter = require('./otherRouter')
 const auth = require('../middleware/AuthHandingMiddleware')
 
 
@@ -18,6 +19,7 @@ router.use('/categories', CategoriesRouter)
 router.use('/characteristic', characteristicRouter)
 router.use('/board', auth.isAuthorized, boardRouter)
 router.use('/chat', auth.isAuthorized, chatRouter)
+router.use('/static', otherRouter)
 
 
 module.exports = router

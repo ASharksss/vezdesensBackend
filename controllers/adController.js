@@ -1,14 +1,10 @@
 const ApiError = require("../error/ApiError");
 const {
   Ad,
-  Category,
-  SubCategory,
-  Objects,
   TypeAd,
   Booking,
   AdView,
   Favorite,
-  CharacteristicObject, CharacteristicSubCategory, Characteristic, CharacteristicValue, TypeCharacteristic,
   AdCharacteristicInput, AdCharacteristicSelect, User, Rating,
 } = require('../models')
 const {Op} = require("sequelize");
@@ -161,9 +157,9 @@ class AdController {
       //Достаем объявление
       const ad = await Ad.findOne({
         where: [{id: adId}],
-
         include: [
-          {model: AdView}, {model: User}
+          {model: AdView}, {model: Favorite, where: {userId}, required: false},
+          {model: User, include: {model: Rating, attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'], include: {model: User}}}
         ]
       })
 
@@ -192,7 +188,7 @@ class AdController {
 
       await Ad.update({views: viewsCount}, {where: {id: adId}})
 
-      return res.json({ad, viewsCount})
+      return res.json({ad})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
