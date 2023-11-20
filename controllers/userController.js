@@ -1,22 +1,33 @@
 const ApiError = require("../error/ApiError");
-const {Op, Sequelize} = require('sequelize');
+const {Op, literal, fn, col} = require('sequelize');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {User, Rating, Ad, Favorite, StatusAd, TypeAd, Objects, AdView} = require('../models')
 
 
 const generateAccessToken = async (id) => {
-  return jwt.sign(id, process.env.SECRET_KEY, {expiresIn: '365d'});
+  let date = new Date()
+  return jwt.sign({id, exp: date.setDate(date.getDate() + 365)}, process.env.SECRET_KEY);
 }
 
 class UserController {
 
   async check(req, res, next) {
-    const {id} = req.query
-    if (!id) {
-      return next(ApiError.badRequest('Не задан ID'))
+    const {token} = req.query
+    if (!token) {
+      return next(ApiError.badRequest('Не задан токен'))
     }
-    res.json(id)
+    jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
+      if (err) {
+        return next(ApiError.badRequest('Неправильный токен или он просрочен'))
+      }
+      const userDB = await User.findOne({
+        where: {id: user.id},
+        attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone'],
+        raw: true
+      })
+      return res.json({token, username: userDB.login, profile: userDB})
+    })
   }
 
   async registration(req, res, next) {
@@ -66,8 +77,10 @@ class UserController {
       if (!comparePassword) {
         return next(ApiError.forbidden('Неверный пароль'))
       }
-      const token = await generateAccessToken({id: user.id});
-      return res.json({token});
+      const token = await generateAccessToken(user.id);
+      delete user.password
+      delete user.updatedAt
+      return res.json({token, username: user.login, profile: user});
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
@@ -75,7 +88,11 @@ class UserController {
 
   async review(req, res, next) {
     try {
-      const {customerId, sellerId, grade, text} = req.body
+      const {sellerId, grade, text} = req.body
+      const customerId = req.user
+      if (customerId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
       let review = await Rating.create({customerId, sellerId, grade, text})
       return res.json(review)
     } catch (e) {
@@ -88,10 +105,25 @@ class UserController {
       const id = req.params.id
       let user = await User.findOne({
         where: {id},
-        include: {
-          model: Ad, include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: AdView}]
-        }
+        include: [{
+          model: Ad,
+					include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+        },{
+					model: Rating,
+					attributes: ['id', 'text', 'grade', 'createdAt'],
+					include: {
+						model: User,
+						attributes: ['id', 'name']
+					}
+				}]
       })
+			for (let i=0; i< user.dataValues.ads.length; i++) {
+				if (user.dataValues.ads[i].dataValues.favorites.length > 0){
+					user.dataValues.ads[i].dataValues.favoritesCount = user.dataValues.ads[i].dataValues.favorites.length
+				} else {
+					user.dataValues.ads[i].dataValues.favoritesCount = 0
+				}
+			}
       return res.json(user)
     } catch (e) {
       return next(ApiError.badRequest(e.message))

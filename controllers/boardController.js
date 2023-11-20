@@ -1,6 +1,6 @@
 const ApiError = require('../error/ApiError')
-const {Ad, Objects, SubCategory, Category, TypeAd, User, Booking} = require('../models')
-const {Op} = require("sequelize");
+const {Ad, Objects, SubCategory, Category, TypeAd, User, Booking, Favorite} = require('../models')
+const {Op, literal} = require("sequelize");
 
 
 class BoardController {
@@ -8,10 +8,11 @@ class BoardController {
   async getAll(req, res, next) {
     try {
 
-      const {subCategoryId, objectId} = req.query
+      const {subCategoryId, objectId, page=1} = req.query
+			const offset = (page - 1) * 20
       let ads, allAds, bookings
       const currentDate = new Date()
-
+			const userId = req.user
       allAds = await Ad.findAll()
       bookings = await Booking.findAll()
 
@@ -48,8 +49,15 @@ class BoardController {
             }]
           },
             {model: TypeAd},
-            {model: User}
-          ]
+            {model: User},
+						{
+							model: Favorite,
+							where: {userId},
+							required: false
+						}
+          ],
+					limit: 20,
+					offset: offset
         })
 
       }
@@ -68,8 +76,15 @@ class BoardController {
             }]
           },
             {model: TypeAd},
-            {model: User}
-          ]
+            {model: User},
+						{
+							model: Favorite,
+							where: {userId},
+							required: false
+						}
+          ],
+					limit: 20,
+					offset: offset
         })
       }
 
@@ -87,12 +102,19 @@ class BoardController {
             }]
           },
             {model: TypeAd},
-            {model: User}
-          ]
+            {model: User},
+						{
+							model: Favorite,
+							where: {userId},
+							required: false
+						}
+          ],
+					limit: 20,
+					offset: offset
         })
 
       }
-      return res.json(ads)
+      return res.json({ads, page})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

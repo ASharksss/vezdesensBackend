@@ -54,6 +54,21 @@ class CategoriesController {
     }
   }
 
+  async getCategoriesList(req, res, next) {
+    try {
+      const categories = await Category.findAll({
+        attributes: ['id', 'name'],
+        include: [{
+          model:SubCategory,
+          attributes: ['id', 'name']
+        }]
+      })
+      return res.json(categories)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async createSubCategories(req, res, next) {
     try {
       const {subcategory, categoryId} = req.body

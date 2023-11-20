@@ -21,16 +21,21 @@ class AdController {
     try {
       const {
         title, price, description,
-        address, longevity, userId,
-        typeAdId, statusAdId, objectId,
+        address, longevity,
+        typeAd, statusAdId, objectId,
         bookingDateStart, bookingDateEnd, characteristicsInput,
         characteristicsSelect
       } = req.body
 
+			const userId = req.user
+
+			if (userId === null || userId === undefined) {
+				return res.json(ApiError.forbidden('Ошибка токена'))
+			}
 
       let priceTypeAd, ad, time, cost, booking, characterInput, characterSelect
       const currentDate = new Date()
-
+			const typeAdId = await TypeAd.findOne({where: {size: typeAd}, raw: true}).id
       //Бронирование дорогих плашек
       if (typeAdId === 2 || typeAdId === 3 || typeAdId === 4) {
 
@@ -60,13 +65,13 @@ class AdController {
           characterInput = await AdCharacteristicInput.create({
             adId: ad.id,
             characteristicId: item.characteristicId,
-            value: item.value
+            value: parseFloat(item.value)
           })
         })
         //Запись характеристик Checkbox
         characteristicsSelect.map(async (item) => {
           //Проверка Checkbox или Radio
-          let checkNumber = Number.isInteger(item.value)
+          let checkNumber = Number.isInteger(parseInt(item.value))
           //Radio
           if (checkNumber) {
             characterSelect = await AdCharacteristicSelect.create({
@@ -81,7 +86,7 @@ class AdController {
                 characterSelect = await AdCharacteristicSelect.create({
                   adId: ad.Id,
                   characteristicId: item.characteristicId,
-                  valueId: value
+                  valueId: parseInt(value)
                 })
               } catch (e) {
                 return next(ApiError.badRequest(e.message))
@@ -115,7 +120,7 @@ class AdController {
         //Запись характеристик Checkbox
         characteristicsSelect.map(async (item) => {
           //Проверка Checkbox или Radio
-          let checkNumber = Number.isInteger(item.value)
+          let checkNumber = Number.isInteger(parseInt(item.value))
           //Radio
           if (checkNumber) {
             characterSelect = await AdCharacteristicSelect.create({
@@ -140,7 +145,7 @@ class AdController {
         })
 
       }
-      return res.json({ad, characteristics});
+      return res.json({ad});
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
@@ -194,13 +199,33 @@ class AdController {
 
   }
 
-  async inFavorite(req, res) {
+  async inFavorite(req, res, next) {
     try {
-      const {adId, userId} = req.query
+      const {adId} = req.query
+      const userId = req.user
+      if (userId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
       const favoritesOfUser = await Favorite.findOrCreate({
         where: {adId, userId}
       })
       return res.json(favoritesOfUser)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async removeFavorite(req, res, next) {
+    try {
+      const {adId} = req.query
+      const userId = req.user
+      if (userId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+      await Favorite.destroy({
+        where: {adId, userId}
+      })
+      return res.json({message: 'done'})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

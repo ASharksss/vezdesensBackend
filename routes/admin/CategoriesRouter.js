@@ -6,6 +6,7 @@ const router = new Router()
 
 
 router.get('/getCategories', categoriesController.getCategories)
+router.get('/getCategoriesList', categoriesController.getCategoriesList)
 router.get('/getSubCategories', categoriesController.getSubCategories)
 router.get('/getObjects', categoriesController.getObjects)
 

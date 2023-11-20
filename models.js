@@ -33,6 +33,11 @@ const SubCategory = sequelize.define('subCategory', {
   id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
 })
 
+const ImageAd = sequelize.define('imageAd', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
 const Objects = sequelize.define('objects', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
@@ -140,6 +145,8 @@ Ad.belongsTo(StatusAd)
 Objects.hasMany(Ad)
 Ad.belongsTo(Objects)
 
+Ad.hasMany(ImageAd)
+ImageAd.belongsTo(Ad)
 //Бронирование типов объявления
 Ad.hasMany(Booking)
 Booking.belongsTo(Ad)
