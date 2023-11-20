@@ -8,8 +8,7 @@ class BoardController {
   async getAll(req, res, next) {
     try {
 
-      const {subCategoryId, objectId, page=1} = req.query
-			const offset = (page - 1) * 20
+      const {subCategoryId, objectId, offset= 1} = req.query
       let ads, allAds, bookings
       const currentDate = new Date()
 			const userId = req.user
@@ -56,8 +55,8 @@ class BoardController {
 							required: false
 						}
           ],
-					limit: 20,
-					offset: offset
+            limit: 15,
+            offset: parseInt(offset)
         })
 
       }
@@ -83,8 +82,8 @@ class BoardController {
 							required: false
 						}
           ],
-					limit: 20,
-					offset: offset
+            limit: 15,
+            offset: parseInt(offset)
         })
       }
 
@@ -109,12 +108,12 @@ class BoardController {
 							required: false
 						}
           ],
-					limit: 20,
-					offset: offset
+            limit: 15,
+            offset: parseInt(offset)
         })
 
       }
-      return res.json({ads, page})
+      return res.json({ads, offset})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
