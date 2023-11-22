@@ -1,9 +1,11 @@
 require('dotenv').config()
 const cookieParser = require('cookie-parser');
 const express = require('express')
+const fileUpload = require('express-fileupload')
+const cors = require('cors')
+const path = require('path')
 const sequelize = require('./db')
 const models = require('./models')
-const cors = require('cors')
 const router = require('./routes/index')
 const errorHandler = require('./middleware/ErrorHandingMiddleware')
 
@@ -14,6 +16,8 @@ const app = express()
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
 app.use(express.json())
 app.use(cookieParser());
+app.use(express.static(path.resolve(__dirname, 'static')))
+app.use(fileUpload({}));
 app.use('/api', router)
 
 

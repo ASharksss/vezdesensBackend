@@ -262,6 +262,7 @@ module.exports = {
   SubCategory,
   User,
   Chat,
+	ImageAd,
   Booking
 }
 

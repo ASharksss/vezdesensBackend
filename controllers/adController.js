@@ -1,16 +1,17 @@
+const uuid = require('uuid')
+const path = require('path')
 const ApiError = require("../error/ApiError");
 const {
   Ad,
   TypeAd,
   Booking,
   AdView,
-  Favorite,
+  Favorite, ImageAd,
   AdCharacteristicInput, AdCharacteristicSelect, User, Rating,
 } = require('../models')
 const {Op} = require("sequelize");
 
 class AdController {
-
 
   async createAd(req, res, next) {
 
@@ -22,6 +23,8 @@ class AdController {
         bookingDateStart, bookingDateEnd, characteristicsInput,
         characteristicsSelect
       } = req.body
+
+			const {images} = req.files
 
 			const userId = req.user
 
@@ -58,7 +61,7 @@ class AdController {
         })
 
         //Запись характеристик enter
-        characteristicsInput.map(async (item) => {
+        JSON.parse(characteristicsInput).map(async (item) => {
           characterInput = await AdCharacteristicInput.create({
             adId: ad.id,
             characteristicId: item.characteristicId,
@@ -66,7 +69,7 @@ class AdController {
           })
         })
         //Запись характеристик Checkbox
-        characteristicsSelect.map(async (item) => {
+				JSON.parse(characteristicsSelect).map(async (item) => {
           //Проверка Checkbox или Radio
           let checkNumber = Number.isInteger(parseInt(item.value))
           //Radio
@@ -94,7 +97,7 @@ class AdController {
 
 
         //Запись бронирования
-        booking = await Booking.create({
+        await Booking.create({
           userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost
         })
       } else {
@@ -107,7 +110,7 @@ class AdController {
         })
 
         //Запись характеристик enter
-        characteristicsInput.map(async (item) => {
+        JSON.parse(characteristicsInput).map(async (item) => {
           characterInput = await AdCharacteristicInput.create({
             adId: ad.id,
             characteristicId: item.characteristicId,
@@ -115,7 +118,7 @@ class AdController {
           })
         })
         //Запись характеристик Checkbox
-        characteristicsSelect.map(async (item) => {
+        JSON.parse(characteristicsSelect).map(async (item) => {
           //Проверка Checkbox или Radio
           let checkNumber = Number.isInteger(parseInt(item.value))
           //Radio
@@ -141,6 +144,11 @@ class AdController {
           }
         })
       }
+			images.map(async (image) => {
+				let fileName = uuid.v4() + '.jpg'
+				await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+				await ImageAd.create({adId: ad.id, name: fileName})
+			})
       return res.json({ad});
     } catch (e) {
       return next(ApiError.badRequest(e.message))
@@ -157,10 +165,25 @@ class AdController {
       //Достаем объявление
       const ad = await Ad.findOne({
         where: [{id: adId}],
-        include: [
-          {model: AdView}, {model: Favorite, where: {userId}, required: false},
-          {model: User, include: {model: Rating, attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'], include: {model: User}}}
-        ]
+        include: [{
+					model: AdView
+				}, {
+					model: Favorite,
+					where: {userId},
+					required: false
+				}, {
+					model: User,
+					include: {
+						model: Rating,
+						attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
+						include: {
+							model: User
+						}
+					}
+				}, {
+					model: ImageAd,
+					required: false
+				}]
       })
 
       //Получение просмотров по объявлению
