@@ -31,7 +31,8 @@ class AdController {
 
       let priceTypeAd, ad, time, cost, booking, characterInput, characterSelect
       const currentDate = new Date()
-			const typeAdId = await TypeAd.findOne({where: {size: typeAd}, raw: true}).id
+			const typeAdBD = await TypeAd.findOne({where: {size: typeAd}, raw: true})
+      const typeAdId = typeAdBD.id
       //Бронирование дорогих плашек
       if (typeAdId === 2 || typeAdId === 3 || typeAdId === 4) {
 
@@ -139,7 +140,6 @@ class AdController {
             })
           }
         })
-
       }
       return res.json({ad});
     } catch (e) {

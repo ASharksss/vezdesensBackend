@@ -106,24 +106,24 @@ class UserController {
       let user = await User.findOne({
         where: {id},
         include: [{
-          model: Ad,
-					include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+            model: Ad,
+            include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
         },{
-					model: Rating,
-					attributes: ['id', 'text', 'grade', 'createdAt'],
-					include: {
-						model: User,
-						attributes: ['id', 'name']
-					}
-				}]
+            model: Rating,
+            attributes: ['id', 'text', 'grade', 'createdAt'],
+            include: {
+                model: User,
+                attributes: ['id', 'name']
+            }
+        }]
       })
-			for (let i=0; i< user.dataValues.ads.length; i++) {
-				if (user.dataValues.ads[i].dataValues.favorites.length > 0){
-					user.dataValues.ads[i].dataValues.favoritesCount = user.dataValues.ads[i].dataValues.favorites.length
-				} else {
-					user.dataValues.ads[i].dataValues.favoritesCount = 0
-				}
-			}
+        for (let i=0; i< user.dataValues.ads.length; i++) {
+            if (user.dataValues.ads[i].dataValues.favorites.length > 0){
+                user.dataValues.ads[i].dataValues.favoritesCount = user.dataValues.ads[i].dataValues.favorites.length
+            } else {
+                user.dataValues.ads[i].dataValues.favoritesCount = 0
+            }
+        }
       return res.json(user)
     } catch (e) {
       return next(ApiError.badRequest(e.message))

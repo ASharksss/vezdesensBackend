@@ -8,10 +8,12 @@ class BoardController {
   async getAll(req, res, next) {
     try {
 
-      const {subCategoryId, objectId, offset= 1} = req.query
-      let ads, allAds, bookings
+      const {subCategoryId, objectId, offset= "0|0"} = req.query
+      let ads, allAds, bookings,
+        blockOffset = parseInt(offset.split('|')[0]),
+        commercialOffset = parseInt(offset.split('|')[1])
       const currentDate = new Date()
-			const userId = req.user
+      const userId = req.user
       allAds = await Ad.findAll()
       bookings = await Booking.findAll()
 
@@ -36,8 +38,32 @@ class BoardController {
 
       //Проверка на категорию
       if (!subCategoryId && !objectId) {
+        console.log('offsets',blockOffset, commercialOffset)
         ads = await Ad.findAll({
           where: {
+            [Op.or]: [{statusAdId: 1}, {statusAdId: 2}],
+            typeAdId: 1
+          },
+          include: [{
+            model: Objects,
+            include: [{
+              model: SubCategory,
+              include: Category
+            }]
+          },
+          {model: TypeAd},
+          {model: User},
+          {
+              model: Favorite,
+              where: {userId},
+              required: false
+          }],
+          limit: 15,
+          offset: blockOffset
+        })
+        const ads2 = await Ad.findAll({
+          where: {
+            typeAdId: 2,
             [Op.or]: [{statusAdId: 1}, {statusAdId: 2}]
           },
           include: [{
@@ -47,18 +73,20 @@ class BoardController {
               include: Category
             }]
           },
-            {model: TypeAd},
-            {model: User},
-						{
-							model: Favorite,
-							where: {userId},
-							required: false
-						}
-          ],
-            limit: 15,
-            offset: parseInt(offset)
+          {model: TypeAd},
+          {model: User},
+          {
+              model: Favorite,
+              where: {userId},
+              required: false
+          }],
+          limit: 6,
+          offset: commercialOffset
         })
-
+        // console.log(ads)
+        blockOffset += ads.length
+        commercialOffset += ads2.length
+        ads.push(...ads2)
       }
 
       if (subCategoryId && !objectId) {
@@ -74,16 +102,15 @@ class BoardController {
               include: Category
             }]
           },
-            {model: TypeAd},
-            {model: User},
-						{
-							model: Favorite,
-							where: {userId},
-							required: false
-						}
-          ],
-            limit: 15,
-            offset: parseInt(offset)
+          {model: TypeAd},
+          {model: User},
+          {
+              model: Favorite,
+              where: {userId},
+              required: false
+          }],
+          limit: 15,
+          offset: parseInt(offset)
         })
       }
 
@@ -100,20 +127,18 @@ class BoardController {
               include: Category
             }]
           },
-            {model: TypeAd},
-            {model: User},
-						{
-							model: Favorite,
-							where: {userId},
-							required: false
-						}
-          ],
-            limit: 15,
-            offset: parseInt(offset)
+          {model: TypeAd},
+          {model: User},
+          {
+              model: Favorite,
+              where: {userId},
+              required: false
+          }],
+          limit: 15,
+          offset: parseInt(offset)
         })
-
       }
-      return res.json({ads, offset})
+      return res.json({ads, blockOffset, commercialOffset})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
