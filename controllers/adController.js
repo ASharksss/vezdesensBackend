@@ -144,11 +144,18 @@ class AdController {
           }
         })
       }
-			images.map(async (image) => {
-				let fileName = uuid.v4() + '.jpg'
-				await image.mv(path.resolve(__dirname, '..', 'static', fileName))
-				await ImageAd.create({adId: ad.id, name: fileName})
-			})
+
+      if (images.length === undefined) {
+        let fileName = uuid.v4() + '.jpg'
+        await images.mv(path.resolve(__dirname, '..', 'static', fileName))
+        await ImageAd.create({adId: ad.id, name: fileName})
+      } else {
+        images.map(async (image) => {
+          let fileName = uuid.v4() + '.jpg'
+          await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+          await ImageAd.create({adId: ad.id, name: fileName})
+        })
+      }
       return res.json({ad});
     } catch (e) {
       return next(ApiError.badRequest(e.message))

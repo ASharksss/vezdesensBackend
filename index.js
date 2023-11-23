@@ -13,10 +13,10 @@ const PORT = process.env.PORT
 
 
 const app = express()
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(cors({ credentials: true, origin: ['http://localhost:3000', 'http://192.168.1.115:3000', '*'] }))
 app.use(express.json())
 app.use(cookieParser());
-app.use(express.static(path.resolve(__dirname, 'static')))
+app.use('/static', express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}));
 app.use('/api', router)
 
