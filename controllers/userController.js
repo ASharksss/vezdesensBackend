@@ -38,7 +38,8 @@ class UserController {
         where: {
           [Op.or]: [{email}, {login}]
         },
-        defaults: {email, login, name, phone, password: hashPassword}
+        defaults: {email, login, name, phone, password: hashPassword},
+        raw: true
       }).catch(err => {
         console.log('Error', err)
         return next(ApiError.badRequest(err))
@@ -49,7 +50,8 @@ class UserController {
         }
         return result
       })
-      return res.json(user)
+      const token = await generateAccessToken(user.id);
+      return res.json({token, username: user.login, profile: user})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
