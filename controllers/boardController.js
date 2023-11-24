@@ -6,17 +6,18 @@ const {
 	Favorite, ImageAd
 } = require('../models')
 const {Op, literal} = require("sequelize");
+const {decryptArrayWithKey} = require("../utils");
 
 
 class BoardController {
 
 	async getAll(req, res, next) {
 		try {
-
-			const {subCategoryId, objectId, offset = "0|0"} = req.query
+			const {subCategoryId, objectId, offset = "0|0|0", key} = req.query
 			let ads, allAds, bookings,
 				blockOffset = parseInt(offset.split('|')[0]),
-				commercialOffset = parseInt(offset.split('|')[1])
+				commercialOffset = parseInt(offset.split('|')[1]),
+				vipOffset = parseInt(offset.split('|')[2])
 			const currentDate = new Date()
 			const userId = req.user
 			allAds = await Ad.findAll()
@@ -69,7 +70,39 @@ class BoardController {
 					limit: 15,
 					offset: blockOffset
 				})
-				const ads2 = await Ad.findAll({
+				const adsVip = await Ad.findAll({
+					where: {
+						typeAdId: 3,
+						[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]
+					},
+					include: [{
+						model: Objects,
+						include: [{
+							model: SubCategory,
+							include: Category
+						}]
+					}, {
+						model: TypeAd
+					}, {
+						model: User
+					}, {
+						model: Favorite,
+						where: {userId},
+						required: false
+					}, {
+						model: ImageAd,
+						required: false
+					}],
+					limit: 2,
+					offset: vipOffset
+				})
+				let adsCommercialLimit = 4
+				if (adsVip.length < 2)
+					if (adsVip.length === 0)
+						adsCommercialLimit += 2
+					else
+						adsCommercialLimit += 1
+				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
 						[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]
@@ -92,13 +125,15 @@ class BoardController {
 						model: ImageAd,
 						required: false
 					}],
-					limit: 6,
+					limit: adsCommercialLimit,
 					offset: commercialOffset
 				})
 				// console.log(ads)
 				blockOffset += ads.length
-				commercialOffset += ads2.length
-				ads.push(...ads2)
+				commercialOffset += adsCommercial.length
+				vipOffset += adsVip.length
+				ads.push(...adsCommercial)
+				ads.push(...adsVip)
 			}
 
 			if (subCategoryId && !objectId) {
@@ -127,30 +162,70 @@ class BoardController {
 			}
 
 			if (!subCategoryId && objectId) {
+				let ignoreIds = []
+				if (key !== undefined) {
+					ignoreIds = decryptArrayWithKey(key)
+					console.log(ignoreIds)
+				}
 				ads = await Ad.findAll({
 					where: [
 						{objectId: objectId},
+						{id: {[Op.notIn]: ignoreIds}},
+						{typeAdId: 1},
 						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
 					],
-					include: [{
-						model: Objects,
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					},
-						{model: TypeAd},
-						{model: User},
+					include: [
 						{
+							model: Objects,
+							include: [{
+								model: SubCategory,
+								include: Category
+							}]
+						}, {
+							model: TypeAd
+						}, {
+							model: User
+						}, {
 							model: Favorite,
 							where: {userId},
 							required: false
+						}, {
+							model: ImageAd,
+							required: false
 						}],
-					limit: 15,
+					order: literal('rand()'),
+					limit: 20,
 					offset: parseInt(offset)
 				})
+				blockOffset += ads.length
 			}
-			return res.json({ads, blockOffset, commercialOffset})
+			return res.json({ads, blockOffset, commercialOffset, vipOffset})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest(e.message))
+		}
+	}
+
+	async getPremium(req, res, next) {
+		try {
+			const ads = await Ad.findAll({
+				where: [{statusAdId: 2}, {typeAdId: 4}],
+				include: [{
+					model: Objects,
+					include: [{
+						model: SubCategory,
+						include: Category
+					}]
+				}, {
+					model: TypeAd
+				}, {
+					model: User
+				}, {
+					model: ImageAd,
+					required: false
+				}],
+			})
+			return res.json({ads})
 		} catch (e) {
 			console.log(e)
 			return next(ApiError.badRequest(e.message))
