@@ -7,7 +7,7 @@ const {
   Booking,
   AdView,
   Favorite, ImageAd,
-  AdCharacteristicInput, AdCharacteristicSelect, User, Rating,
+  AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects,
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -236,6 +236,58 @@ class AdController {
         where: {adId, userId}
       })
       return res.json(favoritesOfUser)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async adArchive(req, res, next) {
+    try {
+			const adId = req.params.id
+      const userId = req.user
+      if (userId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+			await Ad.update({statusAdId: 4}, {where: {id: adId}})
+			const ads = await Ad.findAll({
+				where: {userId},
+				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+			})
+			for (let i=0; i< ads.length; i++) {
+				if (ads[i].dataValues.favorites.length > 0){
+					ads[i].dataValues.favoritesCount = ads[i].dataValues.favorites.length
+					delete ads[i].dataValues.favorites
+				} else {
+					ads[i].dataValues.favoritesCount = 0
+				}
+			}
+      return res.json(ads)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async adPublish(req, res, next) {
+    try {
+			const adId = req.params.id
+      const userId = req.user
+      if (userId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+			await Ad.update({statusAdId: 1}, {where: {id: adId}})
+			const ads = await Ad.findAll({
+				where: {userId},
+				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+			})
+			for (let i=0; i< ads.length; i++) {
+				if (ads[i].dataValues.favorites.length > 0){
+					ads[i].dataValues.favoritesCount = ads[i].dataValues.favorites.length
+					delete ads[i].dataValues.favorites
+				} else {
+					ads[i].dataValues.favoritesCount = 0
+				}
+			}
+      return res.json(ads)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

@@ -58,10 +58,14 @@ class CategoriesController {
     try {
       const categories = await Category.findAll({
         attributes: ['id', 'name'],
-        include: [{
+        include: {
           model:SubCategory,
-          attributes: ['id', 'name']
-        }]
+          attributes: ['id', 'name'],
+					include: {
+						model: Objects,
+						attributes: ['id', 'name']
+					}
+        }
       })
       return res.json(categories)
     } catch (e) {

@@ -102,6 +102,23 @@ class UserController {
     }
   }
 
+  async getUserReview(req, res, next) {
+    try {
+      const {id} = req.params
+      let reviews = await Rating.findAll({
+				where: {sellerId: id},
+				attributes: ['id', 'createdAt', 'grade', 'text'],
+				include: [{
+					model: User,
+					attributes: ['id', 'login', 'name']
+				}]
+			})
+      return res.json(reviews)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async getOneUser(req, res, next) {
     try {
       const id = req.params.id
@@ -122,6 +139,7 @@ class UserController {
         for (let i=0; i< user.dataValues.ads.length; i++) {
             if (user.dataValues.ads[i].dataValues.favorites.length > 0){
                 user.dataValues.ads[i].dataValues.favoritesCount = user.dataValues.ads[i].dataValues.favorites.length
+								delete user.dataValues.ads[i].dataValues.favorites
             } else {
                 user.dataValues.ads[i].dataValues.favoritesCount = 0
             }
