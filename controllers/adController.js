@@ -167,31 +167,56 @@ class AdController {
       const adId = req.params.id
       const userId = req.user
 
-      let view
+      let view, ad
 
-      //Достаем объявление
-      const ad = await Ad.findOne({
-        where: [{id: adId}],
-        include: [{
-					model: AdView
-				}, {
-					model: Favorite,
-					where: {userId},
-					required: false
-				}, {
-					model: User,
-					include: {
-						model: Rating,
-						attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
+			if (userId !== null) {
+				//Достаем объявление
+				ad = await Ad.findOne({
+					where: [{id: adId}],
+					include: [{
+						model: AdView
+					}, {
+						model: Favorite,
+						where: {userId},
+						required: false
+					}, {
+						model: User,
 						include: {
-							model: User
+							model: Rating,
+							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
+							include: {
+								model: User
+							}
 						}
-					}
-				}, {
-					model: ImageAd,
-					required: false
-				}]
-      })
+					}, {
+						model: ImageAd,
+						required: false
+					}]
+				})
+			} else {
+				//Достаем объявление
+				ad = await Ad.findOne({
+					where: [{id: adId}],
+					include: [{
+						model: AdView
+					}, {
+						model: Favorite,
+						required: false
+					}, {
+						model: User,
+						include: {
+							model: Rating,
+							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
+							include: {
+								model: User
+							}
+						}
+					}, {
+						model: ImageAd,
+						required: false
+					}]
+				})
+			}
 
       //Получение просмотров по объявлению
       const viewsOfAd = await AdView.findAndCountAll({
@@ -200,21 +225,23 @@ class AdController {
       //Количество просмотров
       const viewsCount = viewsOfAd.count
 
-      //Все просмотры по объявлению
-      const tableViews = await AdView.findOne({
-        where: {
-          [Op.and]: [{adId, userId}]
-        }
-      })
+			if (userId !== null) {
+				//Все просмотры по объявлению
+				const tableViews = await AdView.findOne({
+					where: {
+						[Op.and]: [{adId, userId}]
+					}
+				})
 
-      //Если совпадение не найдено - создаем
-      if (!tableViews) {
-        view = await AdView.create({
-          userId,
-          adId
-        })
-        view.save()
-      }
+				//Если совпадение не найдено - создаем
+				if (!tableViews) {
+					view = await AdView.create({
+						userId,
+						adId
+					})
+					view.save()
+				}
+			}
 
       await Ad.update({views: viewsCount}, {where: {id: adId}})
 

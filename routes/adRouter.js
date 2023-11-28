@@ -5,7 +5,7 @@ const auth = require("../middleware/AuthHandingMiddleware");
 
 
 
-router.get('/getOneAd/:id', adController.getOneAd)
+router.get('/getOneAd/:id', auth.isAuthorized, adController.getOneAd)
 router.get('/search', adController.searchAd)
 router.get('/inFavorite', auth.isAuthorized, adController.inFavorite)
 router.get('/archive/:id', auth.isAuthorized, adController.adArchive)
