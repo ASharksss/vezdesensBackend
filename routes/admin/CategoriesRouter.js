@@ -1,6 +1,5 @@
 const Router = require('express')
 const categoriesController = require('../../controllers/admin/CategoriesController')
-const adController = require("../../controllers/adController");
 
 const router = new Router()
 

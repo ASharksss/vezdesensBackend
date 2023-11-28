@@ -1,7 +1,7 @@
 const ApiError = require('../../error/ApiError')
-const {Category} = require('../../models')
-const {SubCategory} = require('../../models')
-const {Objects} = require('../../models')
+const {Category, SubCategory,
+	Objects, Ad} = require('../../models')
+const {Op} = require("sequelize");
 
 class CategoriesController {
 
@@ -10,8 +10,19 @@ class CategoriesController {
       const categories = await Category.findAll({
         attributes: ['id', 'name']
       })
-      return res.json(categories)
+			const currentDate = new Date();
+			currentDate.setHours(0, 0, 0, 0);
+			const ads = await Ad.findAll({
+				where: {
+					typeAdId: 4,
+					dateEndActive: {
+						[Op.gt]: currentDate,
+					}
+				}
+			})
+      return res.json({categories, premium: ads.length !== 2})
     } catch (e) {
+			console.log(e)
       return next(ApiError.badRequest(e.message))
     }
   }
@@ -56,14 +67,30 @@ class CategoriesController {
 
   async getCategoriesList(req, res, next) {
     try {
+			const {categoryId} = req.query
+			if (categoryId) {
+				const categories = await Category.findAll({
+					where: {id: categoryId},
+					attributes: ['id', 'name'],
+					include: [{
+						model: SubCategory,
+						attributes: ['id', 'name', 'categoryId'],
+						include: {
+							model: Objects,
+							attributes: ['id', 'name', 'subCategoryId']
+						}
+					}]
+				})
+				return res.json(categories)
+			}
       const categories = await Category.findAll({
         attributes: ['id', 'name'],
         include: {
           model:SubCategory,
-          attributes: ['id', 'name'],
+          attributes: ['id', 'name', 'categoryId'],
 					include: {
 						model: Objects,
-						attributes: ['id', 'name']
+						attributes: ['id', 'name', 'subCategoryId']
 					}
         }
       })
