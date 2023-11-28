@@ -1,16 +1,18 @@
 const Router = require('express')
 const router = new Router()
 const adController = require('../controllers/adController')
+const auth = require("../middleware/AuthHandingMiddleware");
 
 
 
 router.get('/getOneAd/:id', adController.getOneAd)
-router.get('/inFavorite', adController.inFavorite)
-router.get('/archive/:id', adController.adArchive)
-router.get('/publish/:id', adController.adPublish)
+router.get('/search', adController.searchAd)
+router.get('/inFavorite', auth.isAuthorized, adController.inFavorite)
+router.get('/archive/:id', auth.isAuthorized, adController.adArchive)
+router.get('/publish/:id', auth.isAuthorized, adController.adPublish)
 
-router.delete('/removeFavorite', adController.removeFavorite)
+router.delete('/removeFavorite', auth.isAuthorized, adController.removeFavorite)
 
-router.post('/createAd', adController.createAd)
+router.post('/createAd', auth.isAuthorized, adController.createAd)
 
 module.exports = router

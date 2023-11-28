@@ -303,11 +303,36 @@ class AdController {
       await Favorite.destroy({
         where: {adId, userId}
       })
-      return res.json({message: 'done'})
+			let favorite = await Favorite.findAll({
+				where: {userId},
+				include: {
+					model: Ad,
+					include: [{model: StatusAd}, {model: Objects}, {model: ImageAd, required: false}, {model: User}]
+				}
+			})
+      return res.json(favorite)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
   }
+
+	async searchAd(req, res, next) {
+		try {
+			const {query} = req.query
+			const ads = await Ad.findAll({
+				where: {
+					title: {[Op.like]: `%${query}%`}
+				},
+				include: [{
+					model: ImageAd,
+					required: false
+				}]
+			})
+			return res.json(ads)
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
+	}
 
   async editAd(req, res) {
 

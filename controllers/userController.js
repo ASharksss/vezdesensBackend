@@ -2,7 +2,8 @@ const ApiError = require("../error/ApiError");
 const {Op, literal, fn, col} = require('sequelize');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const {User, Rating, Ad, Favorite, StatusAd, TypeAd, Objects, AdView} = require('../models')
+const {User, Rating, Ad, Favorite, ImageAd,
+	StatusAd, TypeAd, Objects, AdView} = require('../models')
 
 
 const generateAccessToken = async (id) => {
@@ -126,7 +127,8 @@ class UserController {
         where: {id},
         include: [{
             model: Ad,
-            include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+            include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
+							{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
         },{
             model: Rating,
             attributes: ['id', 'text', 'grade', 'createdAt'],
@@ -171,7 +173,10 @@ class UserController {
         where: {userId},
         include: {
           model: Ad,
-          include: [{model: StatusAd}, {model: Objects}]
+          include: [{model: StatusAd}, {model: Objects}, {model: ImageAd, required: false}, {
+						model: User,
+						attributes: ["name", "phone"]
+					}]
         }
       })
       return res.json(favorite)
