@@ -96,8 +96,16 @@ class UserController {
       if (customerId === null){
         return res.json(ApiError.forbidden('Ошибка токена'))
       }
-      let review = await Rating.create({customerId, sellerId, grade, text})
-      return res.json(review)
+      await Rating.create({customerId, sellerId, grade, text})
+			let reviews = await Rating.findAll({
+				where: {sellerId},
+				attributes: ['id', 'createdAt', 'grade', 'text'],
+				include: [{
+					model: User,
+					attributes: ['id', 'login', 'name']
+				}]
+			})
+      return res.json(reviews)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

@@ -278,7 +278,8 @@ class AdController {
 			await Ad.update({statusAdId: 4}, {where: {id: adId}})
 			const ads = await Ad.findAll({
 				where: {userId},
-				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
+					{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
 			})
 			for (let i=0; i< ads.length; i++) {
 				if (ads[i].dataValues.favorites.length > 0){
@@ -301,10 +302,11 @@ class AdController {
       if (userId === null){
         return res.json(ApiError.forbidden('Ошибка токена'))
       }
-			await Ad.update({statusAdId: 1}, {where: {id: adId}})
+			await Ad.update({statusAdId: 2}, {where: {id: adId}})
 			const ads = await Ad.findAll({
 				where: {userId},
-				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: Favorite, attributes: ['id']}]
+				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
+					{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
 			})
 			for (let i=0; i< ads.length; i++) {
 				if (ads[i].dataValues.favorites.length > 0){
@@ -338,6 +340,33 @@ class AdController {
 				}
 			})
       return res.json(favorite)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async removeAd(req, res, next) {
+    try {
+      const {adId} = req.query
+      const userId = req.user
+      if (userId === null){
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+			await Ad.update({statusAdId: 1}, {where: {id: adId}})
+			const ads = await Ad.findAll({
+				where: {userId},
+				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
+					{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
+			})
+			for (let i=0; i< ads.length; i++) {
+				if (ads[i].dataValues.favorites.length > 0){
+					ads[i].dataValues.favoritesCount = ads[i].dataValues.favorites.length
+					delete ads[i].dataValues.favorites
+				} else {
+					ads[i].dataValues.favoritesCount = 0
+				}
+			}
+			return res.json(ads)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
