@@ -30,7 +30,7 @@ const Category = sequelize.define('category', {
 })
 
 const SubCategory = sequelize.define('subCategory', {
-  id: {type: DataTypes.INTEGER, primaryKey: true},
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
 })
 
