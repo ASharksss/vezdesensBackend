@@ -30,7 +30,8 @@ const Category = sequelize.define('category', {
 })
 
 const SubCategory = sequelize.define('subCategory', {
-  id: {type: DataTypes.UUID, primaryKey: true}, name: {type: DataTypes.STRING}
+  id: {type: DataTypes.INTEGER, primaryKey: true},
+  name: {type: DataTypes.STRING}
 })
 
 const ImageAd = sequelize.define('imageAd', {
