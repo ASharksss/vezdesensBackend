@@ -122,6 +122,21 @@ const UserChat = sequelize.define('userChat', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
+const PositionDistrict = sequelize.define('positionDistrict', {
+	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+	name: {type: DataTypes.STRING, allowNull: false}
+})
+const PositionRegion = sequelize.define('positionRegion', {
+	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+	name: {type: DataTypes.STRING, allowNull: false}
+})
+const PositionCity = sequelize.define('positionCity', {
+	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+	latitude: {type: DataTypes.FLOAT, allowNull: true},
+	longitude: {type: DataTypes.FLOAT, allowNull: true},
+	name: {type: DataTypes.STRING, allowNull: false}
+})
+
 //Relationships
 
 //Объявления
@@ -243,6 +258,13 @@ Chat.belongsTo(User)
 Chat.hasMany(UserChat)
 UserChat.belongsTo(Chat)
 
+//Геоданные
+PositionDistrict.hasMany(PositionRegion)
+PositionRegion.belongsTo(PositionDistrict)
+
+PositionRegion.hasMany(PositionCity)
+PositionCity.belongsTo(PositionRegion)
+
 module.exports = {
   Rating,
   TypeCharacteristic,
@@ -264,6 +286,7 @@ module.exports = {
   User,
   Chat,
 	ImageAd,
-  Booking
+  Booking,
+	PositionCity, PositionRegion, PositionDistrict
 }
 
