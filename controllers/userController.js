@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {User, Rating, Ad, Favorite, ImageAd,
 	StatusAd, TypeAd, Objects, AdView} = require('../models')
+const {HTML_REGISTRATION, transporter} = require("../utils");
 
 
 const generateAccessToken = async (id) => {
@@ -37,7 +38,7 @@ class UserController {
       const hashPassword = await bcrypt.hash(password, 10)
       const user = await User.findOrCreate({
         where: {
-          [Op.or]: [{email}, {login}]
+          [Op.or]: [{email}, {login}, {phone}]
         },
         defaults: {email, login, name, phone, password: hashPassword},
         raw: true
@@ -47,10 +48,26 @@ class UserController {
       }).then((data) => {
         const [result, created] = data
         if (!created) {
-          return next(ApiError.forbidden("Почта или логин заняты!"))
+          return next(ApiError.forbidden("Почта, логин или телефон уже заняты!"))
         }
         return result
       })
+			if (user !== undefined) {
+				const EMAIL_USER = process.env.EMAIL_USER
+				const mailOptions = {
+					from: EMAIL_USER,
+					to: email,
+					subject: 'Регистрация на сайте',
+					html: HTML_REGISTRATION(login, phone)
+				};
+				await transporter.sendMail(mailOptions, function(error, info){
+					if (error) {
+						console.log(error);
+					} else {
+						console.log('Email sent: ' + info.response);
+					}
+				});
+			}
       const token = await generateAccessToken(user.id);
       return res.json({token, username: user.login, profile: user})
     } catch (e) {
