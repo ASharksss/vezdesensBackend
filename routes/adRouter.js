@@ -10,6 +10,7 @@ router.get('/search', adController.searchAd)
 router.get('/inFavorite', auth.isAuthorized, adController.inFavorite)
 router.get('/archive/:id', auth.isAuthorized, adController.adArchive)
 router.get('/publish/:id', auth.isAuthorized, adController.adPublish)
+router.get('/bookingInfo', auth.isAuthorized, adController.getBookingInfo)
 
 router.delete('/removeFavorite', auth.isAuthorized, adController.removeFavorite)
 router.delete('/remove', auth.isAuthorized, adController.removeAd)

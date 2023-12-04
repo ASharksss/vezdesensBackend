@@ -390,6 +390,16 @@ class AdController {
 		}
 	}
 
+  async getBookingInfo(req, res, next) {
+    try {
+      const {name} = req.query
+      const bookingInfo = await TypeAd.findAll({where: {size: name}})
+      return res.json(bookingInfo)
+    }catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async editAd(req, res) {
 
   }
