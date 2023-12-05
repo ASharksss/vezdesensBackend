@@ -79,7 +79,37 @@ function decryptArrayWithKey(encryptedString) {
 	return decryptedArray;
 }
 
+function groupByCharacteristic(data) {// группировка для фильтра
+    const result = [];                // удаляет дубликаты и приводит в нормальный читаемый вид
+    console.log(data.length)
+    data.forEach((item, index) => {
+        if(Math.floor(data.length / 2) < index + 1)
+            return
+        console.log(Math.floor(data.length / 2) <= (index + 1))
+       const existItem = result.find(i => i.id === item['characteristic.id']);
+       if (!existItem) {
+            result.push({
+                id: item['characteristic.id'],
+                name: item['characteristic.name'],
+                typeCharacteristic: item['characteristic.typeCharacteristic.name'],
+                characteristicValues: [
+                    item['characteristic.typeCharacteristic.name'] === 'enter' ? null : {
+                    id: item['characteristic.characteristicValues.id'],
+                    name: item['characteristic.characteristicValues.name']
+                }]
+            });
+       } else {
+            existItem['characteristicValues'].push({
+                id: item['characteristic.characteristicValues.id'],
+                name: item['characteristic.characteristicValues.name']
+            });
+       }
+    });
+    return result;
+}
+
 module.exports = {
 	decryptArrayWithKey,
+    groupByCharacteristic,
 	transporter, HTML_REGISTRATION
 }

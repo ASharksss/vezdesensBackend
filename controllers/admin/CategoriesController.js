@@ -1,7 +1,8 @@
 const ApiError = require('../../error/ApiError')
 const {Category, SubCategory,
-	Objects, Ad} = require('../../models')
-const {Op} = require("sequelize");
+	Objects, Ad, TypeCharacteristic, CharacteristicObject, Characteristic, CharacteristicValue} = require('../../models')
+const {Op, col} = require("sequelize");
+const { groupByCharacteristic } = require('../../utils');
 
 class CategoriesController {
 
@@ -81,6 +82,31 @@ class CategoriesController {
 						}
 					}]
 				})
+        let objectsArray = []
+        categories[0]['dataValues']['subCategories'].map(subCategoryItem => {
+          if(subCategoryItem.dataValues.objects.length > 0) {
+            subCategoryItem.dataValues.objects.map(objectItem => {
+              objectsArray.push(objectItem.dataValues.id)
+            })
+          }
+        })
+        const filter = await CharacteristicObject.findAll({
+          where: { objectId: { [Op.in]: objectsArray }},
+          attributes: ['id'],
+          include: {
+            model: Characteristic,
+            attributes: ['id', 'name'],
+            include: [{
+              model: TypeCharacteristic,
+              attributes: ['id', 'name']
+            }, {
+              model: CharacteristicValue,
+              attributes: ['id', 'name']
+            }]
+          },
+          raw: true
+        })
+        categories.push(...[groupByCharacteristic(filter)])
 				return res.json(categories)
 			}
       const categories = await Category.findAll({
@@ -94,6 +120,7 @@ class CategoriesController {
 					}
         }
       })
+      console.log(categories)
       return res.json(categories)
     } catch (e) {
       return next(ApiError.badRequest(e.message))

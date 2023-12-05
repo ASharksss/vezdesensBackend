@@ -7,7 +7,7 @@ const {
 	Booking,
 	AdView,
 	Favorite, ImageAd,
-	AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects,
+	AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects, Characteristic, CharacteristicValue,
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -43,9 +43,9 @@ class AdController {
 				priceTypeAd = await TypeAd.findByPk(typeAdId, {
 					attributes: ['price']
 				})
-
+				
 				//Проверка дат
-				if (bookingDateStart < currentDate || bookingDateEnd < bookingDateStart) {
+				if (new Date(bookingDateStart) < currentDate || new Date(bookingDateEnd) < new Date(bookingDateStart)) {
 					return next(ApiError.badRequest('некорректно введены даты'))
 				} else {
 					//Определяем срок бронирования
@@ -64,11 +64,13 @@ class AdController {
 						dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
 					})
 
+					await ad.save()
+
 					//Запись характеристик enter
 					JSON.parse(characteristicsInput).map(async (item) => {
 						characterInput = await AdCharacteristicInput.create({
 							adId: ad.id,
-							characteristicId: item.characteristicId,
+							characteristicId: item.id,
 							value: parseFloat(item.value)
 						})
 					})
@@ -80,7 +82,7 @@ class AdController {
 						if (checkNumber) {
 							characterSelect = await AdCharacteristicSelect.create({
 								adId: ad.Id,
-								characteristicId: item.characteristicId,
+								characteristicId: item.id,
 								valueId: item.value
 							})
 						} else {
@@ -89,7 +91,7 @@ class AdController {
 								try {
 									characterSelect = await AdCharacteristicSelect.create({
 										adId: ad.Id,
-										characteristicId: item.characteristicId,
+										characteristicId: item.id,
 										valueId: parseInt(value)
 									})
 								} catch (e) {
@@ -116,11 +118,13 @@ class AdController {
 					dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
 				})
 
+				await ad.save()
+
 				//Запись характеристик enter
 				JSON.parse(characteristicsInput).map(async (item) => {
 					characterInput = await AdCharacteristicInput.create({
 						adId: ad.id,
-						characteristicId: item.characteristicId,
+						characteristicId: item.id,
 						value: item.value
 					})
 				})
@@ -132,7 +136,7 @@ class AdController {
 					if (checkNumber) {
 						characterSelect = await AdCharacteristicSelect.create({
 							adId: ad.Id,
-							characteristicId: item.characteristicId,
+							characteristicId: item.id,
 							valueId: item.value
 						})
 					} else {
@@ -141,7 +145,7 @@ class AdController {
 							try {
 								characterSelect = await AdCharacteristicSelect.create({
 									adId: ad.Id,
-									characteristicId: item.characteristicId,
+									characteristicId: item.id,
 									valueId: value
 								})
 							} catch (e) {
@@ -181,6 +185,25 @@ class AdController {
 				ad = await Ad.findOne({
 					where: [{id: adId}],
 					include: [{
+						model: AdCharacteristicInput,
+						attributes: ['id', 'value'],
+						required: false,
+						include: {
+							model: Characteristic,
+							attributes: ['name']
+						}
+					}, {
+						model: AdCharacteristicSelect,
+						attributes: ['id'],
+						required: false,
+						include: [{
+							model: Characteristic,
+							attributes: ['name']
+						}, {
+							model: CharacteristicValue,
+							attributes: ['name']
+						}]
+					}, {
 						model: AdView
 					}, {
 						model: Favorite,
