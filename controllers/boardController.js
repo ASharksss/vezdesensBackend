@@ -60,7 +60,7 @@ class BoardController {
 					}
 				})
 				const filterAds = await CharacteristicObject.findAll({
-					where: {characteristicId: {[Op.in]: charactericticsIds}},
+					where: charactericticsIds.length > 0 ? {characteristicId: {[Op.in]: charactericticsIds}} : {},
 					include: [{
 						model: Objects,
 						include: [{
@@ -193,26 +193,39 @@ class BoardController {
 			}
 
 			if (subCategoryId && !objectId) {
+				let ignoreIds = []
+				if (key !== undefined) {
+					ignoreIds = decryptArrayWithKey(key)
+				}
 				ads = await Ad.findAll({
+					where: [
+						{id: {[Op.notIn]: ignoreIds}},
+						{typeAdId: 1},
+						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+					],
 					include: [{
 						model: Objects,
 						where: [
-							{subCategoryId: subCategoryId},
-							{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+							{subCategoryId: subCategoryId}
 						],
 						include: [{
 							model: SubCategory,
 							include: Category
 						}]
-					},
-						{model: TypeAd},
-						{model: User},
-						{
-							model: Favorite,
-							where: {userId},
-							required: false
-						}],
-					limit: 15,
+					}, {
+						model: TypeAd
+					}, {
+						model: User
+					}, userId!==null ? {
+						model: Favorite,
+						where: {userId},
+						required: false
+					} : null, {
+						model: ImageAd,
+						required: false
+					}],
+					order: literal('rand()'),
+					limit: 20,
 					offset: parseInt(offset)
 				})
 			}
@@ -221,7 +234,6 @@ class BoardController {
 				let ignoreIds = []
 				if (key !== undefined) {
 					ignoreIds = decryptArrayWithKey(key)
-					console.log(ignoreIds)
 				}
 				ads = await Ad.findAll({
 					where: [
@@ -241,11 +253,11 @@ class BoardController {
 							model: TypeAd
 						}, {
 							model: User
-						}, {
+						}, userId !== null ? {
 							model: Favorite,
 							where: {userId},
 							required: false
-						}, {
+						} : null, {
 							model: ImageAd,
 							required: false
 						}],
