@@ -3,7 +3,7 @@ const {
 	Ad, Objects,
 	SubCategory, Category,
 	TypeAd, User, Booking,
-	Favorite, ImageAd, CharacteristicObject, Characteristic, AdCharacteristicInput
+	Favorite, ImageAd, CharacteristicObject, Characteristic, AdCharacteristicInput, PreviewImageAd
 } = require('../models')
 const {Op, literal} = require("sequelize");
 const {decryptArrayWithKey} = require("../utils");
@@ -83,7 +83,7 @@ class BoardController {
 							}, {
 								model: User
 							}, {
-								model: ImageAd,
+								model: PreviewImageAd,
 								required: false
 							}],
 						}]
@@ -120,7 +120,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: ImageAd,
+						model: PreviewImageAd,
 						required: false
 					}],
 					limit: 15,
@@ -146,7 +146,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: ImageAd,
+						model: PreviewImageAd,
 						required: false
 					}],
 					limit: 2,
@@ -178,7 +178,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: ImageAd,
+						model: PreviewImageAd,
 						required: false
 					}],
 					limit: adsCommercialLimit,
@@ -221,7 +221,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					} : null, {
-						model: ImageAd,
+						model: PreviewImageAd,
 						required: false
 					}],
 					order: literal('rand()'),
@@ -258,7 +258,7 @@ class BoardController {
 							where: {userId},
 							required: false
 						} : null, {
-							model: ImageAd,
+							model: PreviewImageAd,
 							required: false
 						}],
 					order: literal('rand()'),

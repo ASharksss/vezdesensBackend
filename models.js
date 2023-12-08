@@ -39,6 +39,11 @@ const ImageAd = sequelize.define('imageAd', {
   name: {type: DataTypes.STRING}
 })
 
+const PreviewImageAd = sequelize.define('previewImageAd', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
 const Objects = sequelize.define('objects', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
@@ -163,6 +168,9 @@ Ad.belongsTo(Objects)
 
 Ad.hasMany(ImageAd)
 ImageAd.belongsTo(Ad)
+
+Ad.hasMany(PreviewImageAd)
+PreviewImageAd.belongsTo(Ad)
 //Бронирование типов объявления
 Ad.hasMany(Booking)
 Booking.belongsTo(Ad)
@@ -266,27 +274,10 @@ PositionRegion.hasMany(PositionCity)
 PositionCity.belongsTo(PositionRegion)
 
 module.exports = {
-  Rating,
-  TypeCharacteristic,
-  AdCharacteristicInput,
-  AdCharacteristicSelect,
-  CharacteristicSubCategory,
-  CharacteristicObject,
-  Characteristic,
-  CharacteristicValue,
-  Favorite,
-  AdView,
-  Ad,
-  TypeAd,
-  StatusAd,
-  Objects,
-  Role,
-  Category,
-  SubCategory,
-  User,
-  Chat,
-	ImageAd,
-  Booking,
-	PositionCity, PositionRegion, PositionDistrict
+  Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
+  CharacteristicSubCategory, CharacteristicObject, Characteristic,
+  CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
+  Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd,
+  Booking, PositionCity, PositionRegion, PositionDistrict
 }
 

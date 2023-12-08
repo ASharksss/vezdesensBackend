@@ -7,7 +7,7 @@ const {
 	Booking,
 	AdView,
 	Favorite, ImageAd,
-	AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects, Characteristic, CharacteristicValue,
+	AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects, Characteristic, CharacteristicValue, PreviewImageAd,
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -25,6 +25,7 @@ class AdController {
 			} = req.body
 
 			const {images} = req.files
+			const {previewImage} = req.files
 
 			const userId = req.user
 
@@ -69,38 +70,26 @@ class AdController {
 					//Запись характеристик enter
 					JSON.parse(characteristicsInput).map(async (item) => {
 						characterInput = await AdCharacteristicInput.create({
-							adId: ad.id,
+							adId: ad.dataValues.id,
 							characteristicId: item.id,
-							value: parseFloat(item.value)
+							value: item.value
 						})
 					})
-					//Запись характеристик Checkbox
+					//Запись характеристик Checkbox & Radio
 					JSON.parse(characteristicsSelect).map(async (item) => {
-						//Проверка Checkbox или Radio
-						let checkNumber = Number.isInteger(parseInt(item.value))
-						//Radio
-						if (checkNumber) {
-							characterSelect = await AdCharacteristicSelect.create({
-								adId: ad.Id,
-								characteristicId: item.id,
-								valueId: item.value
-							})
-						} else {
-							//Checkbox
-							item.value.map(async (value) => {
-								try {
-									characterSelect = await AdCharacteristicSelect.create({
-										adId: ad.Id,
-										characteristicId: item.id,
-										valueId: parseInt(value)
-									})
-								} catch (e) {
-									return next(ApiError.badRequest(e.message))
-								}
-							})
-						}
+						item.value.map(async (value) => {
+							try {
+								characterSelect = await AdCharacteristicSelect.create({
+									adId: ad.dataValues.id,
+									characteristicId: item.id,
+									characteristicValueId: value
+								})
+								await characterSelect.save()
+							} catch (e) {
+								return next(ApiError.badRequest(e.message))
+							}
+						})
 					})
-
 
 					//Запись бронирования
 					await Booking.create({
@@ -110,7 +99,7 @@ class AdController {
 
 
 			} else {
-				//Создаем объявление без брони
+				// Создаем объявление без брони
 				ad = await Ad.create({
 					title, price, description,
 					address, longevity, userId,
@@ -123,38 +112,31 @@ class AdController {
 				//Запись характеристик enter
 				JSON.parse(characteristicsInput).map(async (item) => {
 					characterInput = await AdCharacteristicInput.create({
-						adId: ad.id,
+						adId: ad.dataValues.id,
 						characteristicId: item.id,
 						value: item.value
 					})
 				})
-				//Запись характеристик Checkbox
+				//Запись характеристик Checkbox & Radio
 				JSON.parse(characteristicsSelect).map(async (item) => {
-					//Проверка Checkbox или Radio
-					let checkNumber = Number.isInteger(parseInt(item.value))
-					//Radio
-					if (checkNumber) {
-						characterSelect = await AdCharacteristicSelect.create({
-							adId: ad.Id,
-							characteristicId: item.id,
-							valueId: item.value
-						})
-					} else {
-						//Checkbox
-						item.value.map(async (value) => {
-							try {
-								characterSelect = await AdCharacteristicSelect.create({
-									adId: ad.Id,
-									characteristicId: item.id,
-									valueId: value
-								})
-							} catch (e) {
-								return next(ApiError.badRequest(e.message))
-							}
-						})
-					}
+					item.value.map(async (value) => {
+						try {
+							characterSelect = await AdCharacteristicSelect.create({
+								adId: ad.dataValues.id,
+								characteristicId: item.id,
+								characteristicValueId: value
+							})
+							await characterSelect.save()
+						} catch (e) {
+							return next(ApiError.badRequest(e.message))
+						}
+					})
 				})
 			}
+
+			let previewName = uuid.v4() + '.jpg'
+			await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
 				let fileName = uuid.v4() + '.jpg'
