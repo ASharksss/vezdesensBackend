@@ -47,7 +47,7 @@ class AdController {
 				
 				//Проверка дат
 				if (new Date(bookingDateStart) < currentDate || new Date(bookingDateEnd) < new Date(bookingDateStart)) {
-					return next(ApiError.badRequest('некорректно введены даты'))
+					return next(ApiError.badRequest('Некорректно введены даты'))
 				} else {
 					//Определяем срок бронирования
 					time = (new Date(bookingDateEnd) - new Date(bookingDateStart)) / 1000 / 60 / 60 / 24
@@ -86,7 +86,7 @@ class AdController {
 								})
 								await characterSelect.save()
 							} catch (e) {
-								return next(ApiError.badRequest(e.message))
+								return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 							}
 						})
 					})
@@ -128,7 +128,7 @@ class AdController {
 							})
 							await characterSelect.save()
 						} catch (e) {
-							return next(ApiError.badRequest(e.message))
+							return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 						}
 					})
 				})
@@ -151,7 +151,7 @@ class AdController {
 			}
 			return res.json({ad});
 		} catch (e) {
-			return next(ApiError.badRequest(e.message))
+			return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 		}
 	}
 
@@ -210,6 +210,25 @@ class AdController {
 				ad = await Ad.findOne({
 					where: [{id: adId}],
 					include: [{
+						model: AdCharacteristicInput,
+						attributes: ['id', 'value'],
+						required: false,
+						include: {
+							model: Characteristic,
+							attributes: ['name']
+						}
+					}, {
+						model: AdCharacteristicSelect,
+						attributes: ['id'],
+						required: false,
+						include: [{
+							model: Characteristic,
+							attributes: ['name']
+						}, {
+							model: CharacteristicValue,
+							attributes: ['name']
+						}]
+					}, {
 						model: AdView
 					}, {
 						model: Favorite,
@@ -256,6 +275,7 @@ class AdController {
 			}
 
 			await Ad.update({views: viewsCount}, {where: {id: adId}})
+			delete ad.dataValues.adViews
 
 			return res.json({ad})
 		} catch (e) {
