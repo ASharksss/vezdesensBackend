@@ -12,9 +12,9 @@ class CharacteristicController {
 
   async createAll(req, res, next) {
     try {
-      const {objectId, typeId, charName, charValueAll} = req.body
+      const {objectId, typeId, charName, charValueAll, required} = req.body
       const char = await Characteristic.create(
-        {name: charName, typeCharacteristicId: typeId})
+        {name: charName, typeCharacteristicId: typeId, required})
 
       const unionObjChar = await CharacteristicObject.create({
         objectId, characteristicId: char.dataValues.id
