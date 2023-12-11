@@ -9,6 +9,44 @@ const {
 
 class CharacteristicController {
 
+
+  async createAll(req, res, next) {
+    try {
+      const {objectId, typeId, charName, charValueAll} = req.body
+      const char = await Characteristic.create(
+        {name: charName, typeCharacteristicId: typeId})
+
+      const unionObjChar = await CharacteristicObject.create({
+        objectId, characteristicId: char.dataValues.id
+      })
+
+
+      typeId == 2 || typeId == 3 ?
+        charValueAll.map(async (item) => {
+          console.log(item)
+          await CharacteristicValue.create({name: item, characteristicId: char.dataValues.id})
+        }) : ''
+
+
+
+      return res.json('Все нормульно')
+
+
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async getTypeCharacteristic(req, res, next) {
+    try {
+      const characteristic = await TypeCharacteristic.findAll()
+      return res.json(characteristic)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+
   //Создание характеристики
   async createCharacteristic(req, res, next) {
     try {
@@ -21,6 +59,7 @@ class CharacteristicController {
       return next(ApiError.badRequest(e.message))
     }
   }
+
 
   //Создание значений для характеристик
   async createCharacteristicValue(req, res, next) {
@@ -78,7 +117,10 @@ class CharacteristicController {
         attributes: ['characteristicId', 'objectId'],
         include: [{
           model: Characteristic,
-          include: [{model: CharacteristicValue, attributes: ['id','name']}, {model: TypeCharacteristic, attributes: ['name']}],
+          include: [{model: CharacteristicValue, attributes: ['id', 'name']}, {
+            model: TypeCharacteristic,
+            attributes: ['name']
+          }],
           attributes: ['name']
         },]
       })
@@ -96,7 +138,10 @@ class CharacteristicController {
         attributes: ['characteristicId', 'subCategoryId'],
         include: [{
           model: Characteristic,
-          include: [{model: CharacteristicValue, attributes: ['id','name']}, {model: TypeCharacteristic, attributes: ['name']}],
+          include: [{model: CharacteristicValue, attributes: ['id', 'name']}, {
+            model: TypeCharacteristic,
+            attributes: ['name']
+          }],
           attributes: ['name']
         },]
       })

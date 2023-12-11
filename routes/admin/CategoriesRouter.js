@@ -11,5 +11,7 @@ router.get('/getObjects', categoriesController.getObjects)
 
 
 router.post( '/addCategory', categoriesController.createCategories)
+router.post( '/addSubCategory', categoriesController.createSubCategories)
+router.post( '/createObject', categoriesController.createObject)
 
 module.exports = router

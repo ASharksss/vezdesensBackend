@@ -66,6 +66,22 @@ class CategoriesController {
     }
   }
 
+
+  async createSubCategories(req, res, next) {
+    try {
+      const {categoryId, arrSub} = req.body
+
+      arrSub.map(async (item) => {
+        console.log(item)
+        await SubCategory.create({name: item, categoryId: categoryId})
+      })
+
+      return res.json(arrSub)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async getCategoriesList(req, res, next) {
     try {
 			const {categoryId} = req.query
@@ -127,21 +143,16 @@ class CategoriesController {
     }
   }
 
-  async createSubCategories(req, res, next) {
-    try {
-      const {subcategory, categoryId} = req.body
-      const subCat = await SubCategory.create({subcategory, categoryId})
-      return res.json(subCat)
-    } catch (e) {
-      return next(ApiError.badRequest(e.message))
-    }
-  }
+
 
   async createObject(req, res, next) {
     try {
-      const {object, subCategoryId} = req.body
-      const obj = await Objects.create({object, subCategoryId})
-      return res.json(obj)
+      const {arrObj, subCategoryId} = req.body
+      arrObj.map(async (item) => {
+        console.log(item)
+        await Objects.create({name: item, subCategoryId: subCategoryId})
+      })
+      return res.json(subCategoryId)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

@@ -59,7 +59,7 @@ const Booking = sequelize.define('booking', {
 
 const Characteristic = sequelize.define('characteristic', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  name: {type: DataTypes.STRING, unique: true}
+  name: {type: DataTypes.STRING}
 })
 
 const TypeCharacteristic = sequelize.define('typeCharacteristic', {
