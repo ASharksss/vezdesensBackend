@@ -121,7 +121,7 @@ class CharacteristicController {
             model: TypeCharacteristic,
             attributes: ['name']
           }],
-          attributes: ['name']
+          attributes: ['name', 'required']
         },]
       })
       return res.json(characteristicObject)
