@@ -142,6 +142,10 @@ const PositionCity = sequelize.define('positionCity', {
 	longitude: {type: DataTypes.FLOAT, allowNull: true},
 	name: {type: DataTypes.STRING, allowNull: false}
 })
+const PositionStreets = sequelize.define('positionStreets', {
+	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+	name: {type: DataTypes.STRING, allowNull: false}
+})
 
 //Relationships
 
@@ -274,11 +278,14 @@ PositionRegion.belongsTo(PositionDistrict)
 PositionRegion.hasMany(PositionCity)
 PositionCity.belongsTo(PositionRegion)
 
+PositionCity.hasMany(PositionStreets)
+PositionStreets.belongsTo(PositionCity)
+
 module.exports = {
   Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
   CharacteristicSubCategory, CharacteristicObject, Characteristic,
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd,
-  Booking, PositionCity, PositionRegion, PositionDistrict
+  Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets
 }
 
