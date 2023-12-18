@@ -97,6 +97,9 @@ class AdController {
 					})
 				}
 
+				let previewName = uuid.v4() + '.jpg'
+				await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+				await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			} else {
 				// Создаем объявление без брони
@@ -133,10 +136,6 @@ class AdController {
 					})
 				})
 			}
-
-			let previewName = uuid.v4() + '.jpg'
-			await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
-			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
 				let fileName = uuid.v4() + '.jpg'
@@ -274,8 +273,21 @@ class AdController {
 				}
 			}
 
+			let today = new Date()
+			today.setUTCHours(0, 0, 0, 0)
+			today = today.toISOString().split('T')[0]
+			const {count, rows} = await AdView.findAndCountAll({
+				where: [{adId}, {createdAt: {
+						[Op.and]: {
+							[Op.gte]: today + ' 00:00:00',
+							[Op.lte]: today + ' 23:59:59.999999',
+						}
+					}}]
+			})
+
 			await Ad.update({views: viewsCount}, {where: {id: adId}})
 			delete ad.dataValues.adViews
+			ad.dataValues.viewsToday = count
 
 			return res.json({ad})
 		} catch (e) {
