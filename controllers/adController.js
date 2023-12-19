@@ -2,12 +2,11 @@ const uuid = require('uuid')
 const path = require('path')
 const ApiError = require("../error/ApiError");
 const {
-	Ad,
-	TypeAd,
-	Booking,
-	AdView,
-	Favorite, ImageAd,
-	AdCharacteristicInput, AdCharacteristicSelect, User, Rating, StatusAd, Objects, Characteristic, CharacteristicValue, PreviewImageAd,
+	Ad, TypeAd, Booking,
+	AdView, Favorite, ImageAd,
+	AdCharacteristicInput, AdCharacteristicSelect, User,
+	Rating, StatusAd, Objects,
+	Characteristic, CharacteristicValue, PreviewImageAd, CharacteristicObject, TypeCharacteristic
 } = require('../models')
 const {Op} = require("sequelize");
 
@@ -122,18 +121,31 @@ class AdController {
 				})
 				//Запись характеристик Checkbox & Radio
 				JSON.parse(characteristicsSelect).map(async (item) => {
-					item.value.map(async (value) => {
+					if (Array.isArray(item.value)) {
+						item.value.map(async (value) => {
+							try {
+								characterSelect = await AdCharacteristicSelect.create({
+									adId: ad.dataValues.id,
+									characteristicId: item.id,
+									characteristicValueId: value
+								})
+								await characterSelect.save()
+							} catch (e) {
+								return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
+							}
+						})
+					} else {
 						try {
 							characterSelect = await AdCharacteristicSelect.create({
 								adId: ad.dataValues.id,
 								characteristicId: item.id,
-								characteristicValueId: value
+								characteristicValueId: item.value
 							})
 							await characterSelect.save()
 						} catch (e) {
 							return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 						}
-					})
+					}
 				})
 			}
 
@@ -444,8 +456,60 @@ class AdController {
 		}
 	}
 
-	async editAd(req, res) {
-
+	async getEditAd(req, res, next) {
+		try {
+			const {id} = req.params
+			const userId = req.user
+			if (userId === null) {
+				return next(ApiError.forbidden('Нет доступа'))
+			}
+			const ad = await Ad.findOne({
+				where: [{id}, {userId}],
+				include: [{
+					model: AdCharacteristicInput,
+					attributes: ['value'],
+					required: false,
+					include: {
+						model: Characteristic,
+						attributes: ['id', 'name']
+					}
+				}, {
+					model: AdCharacteristicSelect,
+					attributes: ['id'],
+					required: false,
+					include: [{
+						model: Characteristic,
+						attributes: ['id', 'name']
+					}, {
+						model: CharacteristicValue,
+						attributes: ['id', 'name']
+					}]
+				}, {
+					model: Objects,
+					include: [{
+						model: CharacteristicObject,
+						attributes: ['characteristicId', 'objectId'],
+						include: [{
+							model: Characteristic,
+							include: [{model: CharacteristicValue, attributes: ['id', 'name']}, {
+								model: TypeCharacteristic,
+								attributes: ['name']
+							}],
+							attributes: ['name', 'required']
+						}]
+					}]
+				}, {
+					model: ImageAd,
+					required: false
+				}]
+			})
+			if (ad === null) {
+				return next(ApiError.forbidden('Нет доступа'))
+			}
+			return res.json(ad)
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
 	}
 
 	async deleteAd(req, res) {
