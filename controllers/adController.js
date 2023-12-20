@@ -1,5 +1,6 @@
-const uuid = require('uuid')
-const path = require('path')
+const uuid = require('uuid');
+const fs = require('fs');
+const path = require('path');
 const ApiError = require("../error/ApiError");
 const {
 	Ad, TypeAd, Booking,
@@ -7,7 +8,7 @@ const {
 	AdCharacteristicInput, AdCharacteristicSelect, User,
 	Rating, StatusAd, Objects,
 	Characteristic, CharacteristicValue, PreviewImageAd, CharacteristicObject, TypeCharacteristic
-} = require('../models')
+} = require('../models');
 const {Op} = require("sequelize");
 
 class AdController {
@@ -32,7 +33,7 @@ class AdController {
 				return res.json(ApiError.forbidden('Ошибка токена'))
 			}
 
-			let priceTypeAd, ad, time, cost, booking, characterInput, characterSelect
+			let priceTypeAd, ad, time, cost, characterInput, characterSelect
 			const currentDate = new Date()
 			const typeAdBD = await TypeAd.findOne({where: {size: typeAd}, raw: true})
 			const typeAdId = typeAdBD.id
@@ -43,7 +44,7 @@ class AdController {
 				priceTypeAd = await TypeAd.findByPk(typeAdId, {
 					attributes: ['price']
 				})
-				
+
 				//Проверка дат
 				if (new Date(bookingDateStart) < currentDate || new Date(bookingDateEnd) < new Date(bookingDateStart)) {
 					return next(ApiError.badRequest('Некорректно введены даты'))
@@ -500,6 +501,7 @@ class AdController {
 					}]
 				}, {
 					model: ImageAd,
+					attributes: ['name'],
 					required: false
 				}]
 			})
@@ -512,6 +514,109 @@ class AdController {
 		}
 	}
 
+	async editAd(req, res, next) {
+		try {
+			const userId = req.user
+			if (userId === null) {
+				return next(ApiError.forbidden('Нет доступа'))
+			}
+			const {id} = req.params
+			let characterInput, characterSelect, ad
+			ad = await Ad.findOne({
+				where: [{id}, {userId}]
+			})
+			if (ad === null) {
+				return next(ApiError.forbidden('Нет доступа'))
+			}
+			const {
+				title, price, description,
+				characteristicsInput, characteristicsSelect
+			} = req.body
+			const {images} = req.files
+			const {previewImage} = req.files
+
+			await Ad.update(
+				{ title, description, price }, {
+					where: {id}
+				})
+
+			await AdCharacteristicInput.destroy({
+				where: {adId: id}
+			})
+			await AdCharacteristicSelect.destroy({
+				where: {adId: id}
+			})
+			//Запись характеристик enter
+			JSON.parse(characteristicsInput).map(async (item) => {
+				characterInput = await AdCharacteristicInput.create({
+					adId: ad.dataValues.id,
+					characteristicId: item.id,
+					value: item.value
+				})
+			})
+			//Запись характеристик Checkbox & Radio
+			JSON.parse(characteristicsSelect).map(async (item) => {
+				if (Array.isArray(item.value)) {
+					item.value.map(async (value) => {
+						try {
+							characterSelect = await AdCharacteristicSelect.create({
+								adId: ad.dataValues.id,
+								characteristicId: item.id,
+								characteristicValueId: value
+							})
+							await characterSelect.save()
+						} catch (e) {
+							return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
+						}
+					})
+				} else {
+					try {
+						characterSelect = await AdCharacteristicSelect.create({
+							adId: ad.dataValues.id,
+							characteristicId: item.id,
+							characteristicValueId: item.value
+						})
+						await characterSelect.save()
+					} catch (e) {
+						return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
+					}
+				}
+			})
+
+			const imagesDB = await ImageAd.findAll({
+				where: {adId: id},
+				raw: true
+			})
+			imagesDB.map(async (item) => {
+				let fileName = item.name
+				const filePath = path.resolve(__dirname, '..', 'static', fileName);
+				await fs.unlink(filePath, (err) => {
+					if (err) {
+						console.error('Ошибка при удалении файла:', err);
+					} else {
+						console.log('Файл успешно удален');
+					}
+				});
+			})
+			await ImageAd.destroy({
+				where: {adId: id}
+			})
+			if (images.length === undefined) {
+				let fileName = uuid.v4() + '.jpg'
+				await images.mv(path.resolve(__dirname, '..', 'static', fileName))
+				await ImageAd.create({adId: ad.id, name: fileName})
+			} else {
+				images.map(async (image) => {
+					let fileName = uuid.v4() + '.jpg'
+					await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+					await ImageAd.create({adId: ad.id, name: fileName})
+				})
+			}
+			return res.json({message: 'Карточка изменена'})
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
+	}
 	async deleteAd(req, res) {
 
 	}

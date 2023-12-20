@@ -17,5 +17,6 @@ router.delete('/removeFavorite', auth.isAuthorized, adController.removeFavorite)
 router.delete('/remove', auth.isAuthorized, adController.removeAd)
 
 router.post('/createAd', auth.isAuthorized, adController.createAd)
+router.post('/editAd/:id', auth.isAuthorized, adController.editAd)
 
 module.exports = router
