@@ -111,6 +111,7 @@ class CategoriesController {
           attributes: ['id'],
           include: {
             model: Characteristic,
+						where: {required: true},
             attributes: ['id', 'name'],
             include: [{
               model: TypeCharacteristic,
