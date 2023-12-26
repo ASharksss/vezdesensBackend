@@ -1,9 +1,13 @@
-const ApiError = require("../error/ApiError");
-const {Op, literal, fn, col} = require('sequelize');
+const {Op} = require('sequelize');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const uuid = require("uuid");
+const path = require("path");
+const fs = require("fs");
+const ApiError = require("../error/ApiError");
 const {User, Rating, Ad, Favorite, ImageAd,
-	StatusAd, TypeAd, Objects, AdView} = require('../models')
+	StatusAd, TypeAd, Objects, AdView, UserAvatar
+} = require('../models')
 const {HTML_REGISTRATION, transporter} = require("../utils");
 
 
@@ -150,7 +154,12 @@ class UserController {
       const id = req.params.id
       let user = await User.findOne({
         where: {id},
+				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone'],
         include: [{
+					model: UserAvatar,
+					attributes: ['name'],
+					required: false
+				},{
             model: Ad,
             include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
 							{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
@@ -205,6 +214,43 @@ class UserController {
         }
       })
       return res.json(favorite)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+	async editInfo(req, res, next) {
+    try {
+      const userId = req.user
+      if (userId === null || userId === undefined) {
+        return res.json(ApiError.forbidden('Ошибка токена'))
+      }
+			const { name, phone, email } = req.body
+			const { avatar } = req.files
+			await User.update({name, phone, email}, {
+				where: {id: userId}
+			})
+			const avatarDB = await UserAvatar.findOne({
+				where: {userId},
+				raw: true
+			})
+			if (avatarDB !== null) {
+				let fileName = avatarDB.name
+				const filePath = path.resolve(__dirname, '..', 'static/avatar', fileName);
+				await fs.unlink(filePath, (err) => {
+					if (err) {
+						console.error('Ошибка при удалении файла:', err);
+					} else {
+						console.log('Файл успешно удален');
+					}
+				});
+				await UserAvatar.destroy({
+					where: {userId}
+				})
+			}
+			let fileName = uuid.v4() + '.jpg'
+			await avatar.mv(path.resolve(__dirname, '..', 'static/avatar', fileName))
+			await UserAvatar.create({userId, name: fileName})
+			res.json({message: 'done'})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

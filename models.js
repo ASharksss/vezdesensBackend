@@ -44,6 +44,11 @@ const PreviewImageAd = sequelize.define('previewImageAd', {
   name: {type: DataTypes.STRING}
 })
 
+const UserAvatar = sequelize.define('userAvatar', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
 const Objects = sequelize.define('objects', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
@@ -261,6 +266,8 @@ Rating.belongsTo(User, {
   foreignKey: 'customerId'
 })
 
+User.hasMany(UserAvatar)
+UserAvatar.belongsTo(User)
 //Чат
 Ad.hasMany(Chat)
 Chat.belongsTo(Ad)
@@ -283,7 +290,7 @@ PositionStreets.belongsTo(PositionCity)
 
 module.exports = {
   Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
-  CharacteristicSubCategory, CharacteristicObject, Characteristic,
+  CharacteristicSubCategory, CharacteristicObject, Characteristic, UserAvatar,
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd,
   Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets
