@@ -225,7 +225,6 @@ class UserController {
         return res.json(ApiError.forbidden('Ошибка токена'))
       }
 			const { name, phone, email } = req.body
-			const { avatar } = req.files
 			await User.update({name, phone, email}, {
 				where: {id: userId}
 			})
@@ -247,9 +246,12 @@ class UserController {
 					where: {userId}
 				})
 			}
-			let fileName = uuid.v4() + '.jpg'
-			await avatar.mv(path.resolve(__dirname, '..', 'static/avatar', fileName))
-			await UserAvatar.create({userId, name: fileName})
+			if (req.files) {
+				const { avatar } = req.files
+				let fileName = uuid.v4() + '.jpg'
+				await avatar.mv(path.resolve(__dirname, '..', 'static/avatar', fileName))
+				await UserAvatar.create({userId, name: fileName})
+			}
 			res.json({message: 'done'})
     } catch (e) {
       return next(ApiError.badRequest(e.message))
