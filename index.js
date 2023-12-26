@@ -31,6 +31,7 @@ const start = async () => {
     await sequelize.authenticate()
     await sequelize.sync().then(() => console.log('успешно'))
       .catch((error) => console.error('Error', error))
+    await sequelize.chatDB.authenticate()
     app.listen(PORT, () => console.log(`Сервер работает на порту ${PORT}`))
   } catch (e) {
     console.log(e)
