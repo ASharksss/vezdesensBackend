@@ -42,19 +42,22 @@ class chatController {
 			const userId = req.user
 			let adsResult = []
 			const [data,] = await chatDB.query(
-				`SELECT chats.id as id, chats.adId as adId,
-							users.senderId as senderId, last_message.lastMessage
-							FROM vezdesens_chat.chats as chats
-							INNER JOIN vezdesens_chat.chat_users as users
-							ON users.chatId = chats.id
-							LEFT OUTER JOIN (
-									SELECT chatId, MAX(createdAt) as lastMessage
-									FROM vezdesens_chat.messages
-									GROUP BY chatId
-							) as last_message
-							ON last_message.chatId = chats.id
-							WHERE chats.sellerId = ${userId} OR users.senderId = ${userId}
-							order by lastMessage desc`)
+				`WITH ranked_messages AS (
+								SELECT
+										chats.id as id,
+										chats.adId as adId,
+										users.senderId as senderId,
+										messages.createdAt as lastMessage,
+										ROW_NUMBER() OVER (PARTITION BY chats.id ORDER BY messages.createdAt DESC) as row_num
+								FROM vezdesens_chat.chats as chats
+								INNER JOIN vezdesens_chat.chat_users as users ON users.chatId = chats.id
+								LEFT OUTER JOIN vezdesens_chat.messages as messages ON messages.chatId = chats.id
+								WHERE chats.sellerId = ${userId} OR users.senderId = ${userId}
+						)
+						SELECT id, adId, senderId, lastMessage
+						FROM ranked_messages
+						WHERE row_num = 1
+						ORDER BY lastMessage DESC;`)
 			const adIds = data.map(item => {
 				return {
 					[item.adId]: [item.senderId, item.lastMessage, item.id]
