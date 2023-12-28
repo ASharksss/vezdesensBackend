@@ -37,6 +37,24 @@ class chatController {
     }
   }
 
+	async getCheckNewMessages(req, res, next) {
+		try {
+			const userId = req.user
+			const [ids,] = await chatDB.query(
+				`SELECT chats.id as id
+						FROM chats as chats
+						inner join chat_users as users on users.chatId = chats.id
+						where users.senderId = ${userId} or users.receiverId = ${userId}
+						GROUP BY chats.id`
+			)
+			const [data,] = await chatDB.query(
+				`SELECT count(*) as count FROM messages where receiverRead=0 and senderId != ${userId} and chatId in (${ids.map(item => item.id).toString()});`)
+			return res.json(data[0])
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
+	}
+
   async getMessages(req, res, next) {
     try {
 			const userId = req.user
@@ -48,19 +66,23 @@ class chatController {
 										chats.adId as adId,
 										users.senderId as senderId,
 										messages.createdAt as lastMessage,
+										COUNT(unreadMessages.id) as unreadCount,
 										ROW_NUMBER() OVER (PARTITION BY chats.id ORDER BY messages.createdAt DESC) as row_num
-								FROM vezdesens_chat.chats as chats
-								INNER JOIN vezdesens_chat.chat_users as users ON users.chatId = chats.id
-								LEFT OUTER JOIN vezdesens_chat.messages as messages ON messages.chatId = chats.id
+								FROM chats as chats
+								INNER JOIN chat_users as users ON users.chatId = chats.id
+								LEFT OUTER JOIN messages as messages ON messages.chatId = chats.id
+								LEFT OUTER JOIN messages as unreadMessages ON unreadMessages.chatId = chats.id
+    						and unreadMessages.receiverRead = 0 and unreadMessages.senderId != ${userId}
 								WHERE chats.sellerId = ${userId} OR users.senderId = ${userId}
+								GROUP BY chats.id, chats.adId, users.senderId, messages.createdAt
 						)
-						SELECT id, adId, senderId, lastMessage
+						SELECT id, adId, senderId, lastMessage, unreadCount
 						FROM ranked_messages
 						WHERE row_num = 1
 						ORDER BY lastMessage DESC;`)
 			const adIds = data.map(item => {
 				return {
-					[item.adId]: [item.senderId, item.lastMessage, item.id]
+					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount]
 				}
 			})
 			for (const obj of adIds) {
@@ -68,6 +90,7 @@ class chatController {
 				let value = parseInt(obj[key][0]);
 				let lastMessage = obj[key][1]
 				let chatId = obj[key][2]
+				let unreadCount = obj[key][3]
 
 				const ads = await Ad.findOne({
 					where: {id: key},
@@ -90,6 +113,7 @@ class chatController {
 				})
 				ads.dataValues['lastMessage'] = lastMessage
 				ads.dataValues['chat'] = chatId
+				ads.dataValues['unreadCount'] = unreadCount
 				adsResult.push([ads, user])
 			}
       return res.json(adsResult)
