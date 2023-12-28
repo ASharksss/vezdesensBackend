@@ -60,27 +60,39 @@ class chatController {
 			const userId = req.user
 			let adsResult = []
 			const [data,] = await chatDB.query(
-				`WITH ranked_messages AS (
+				`SELECT
+								ranked_messages.id,
+								ranked_messages.adId,
+								ranked_messages.senderId,
+								ranked_messages.lastMessage,
+								ranked_messages.unreadCount
+						FROM (
 								SELECT
 										chats.id as id,
 										chats.adId as adId,
 										users.senderId as senderId,
 										messages.createdAt as lastMessage,
 										COUNT(unreadMessages.id) as unreadCount,
-										ROW_NUMBER() OVER (PARTITION BY chats.id ORDER BY messages.createdAt DESC) as row_num
+										(SELECT COUNT(*)
+										 FROM messages as m
+										 WHERE m.chatId = messages.chatId AND m.createdAt > messages.createdAt) + 1 as row_num
 								FROM chats as chats
 								INNER JOIN chat_users as users ON users.chatId = chats.id
 								LEFT OUTER JOIN messages as messages ON messages.chatId = chats.id
 								LEFT OUTER JOIN messages as unreadMessages ON unreadMessages.chatId = chats.id
-    						and unreadMessages.receiverRead = 0 and unreadMessages.senderId != ${userId}
+										AND unreadMessages.receiverRead = 0 AND unreadMessages.senderId != ${userId}
 								WHERE chats.sellerId = ${userId} OR users.senderId = ${userId}
 								GROUP BY chats.id, chats.adId, users.senderId, messages.createdAt
-						)
-						SELECT id, adId, senderId, lastMessage, unreadCount
-						FROM ranked_messages
-						WHERE row_num = 1
-						ORDER BY lastMessage DESC;`)
-			const adIds = data.map(item => {
+						) as ranked_messages
+						WHERE ranked_messages.row_num = 1
+						ORDER BY ranked_messages.lastMessage DESC;`)
+			const newData = data.reduce((o, i) => {
+				if (!o.find(v => v.id === i.id)) {
+					o.push(i);
+				}
+				return o;
+			}, []);
+			const adIds = newData.map(item => {
 				return {
 					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount]
 				}
