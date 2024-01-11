@@ -291,6 +291,9 @@ class BoardController {
 				}, {
 					model: ImageAd,
 					required: false
+				}, {
+					model: PreviewImageAd,
+					required: false
 				}],
 			})
 			return res.json({ads})

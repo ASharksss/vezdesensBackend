@@ -78,18 +78,31 @@ class AdController {
 					})
 					//Запись характеристик Checkbox & Radio
 					JSON.parse(characteristicsSelect).map(async (item) => {
-						item.value.map(async (value) => {
+						if (Array.isArray(item.value)) {
+							item.value.map(async (value) => {
+								try {
+									characterSelect = await AdCharacteristicSelect.create({
+										adId: ad.dataValues.id,
+										characteristicId: item.id,
+										characteristicValueId: value
+									})
+									await characterSelect.save()
+								} catch (e) {
+									return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
+								}
+							})
+						} else {
 							try {
 								characterSelect = await AdCharacteristicSelect.create({
 									adId: ad.dataValues.id,
 									characteristicId: item.id,
-									characteristicValueId: value
+									characteristicValueId: item.value
 								})
 								await characterSelect.save()
 							} catch (e) {
 								return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 							}
-						})
+						}
 					})
 
 					//Запись бронирования
