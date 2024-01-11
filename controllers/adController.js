@@ -35,6 +35,7 @@ class AdController {
 
 			let priceTypeAd, ad, time, cost, characterInput, characterSelect
 			const currentDate = new Date()
+			currentDate.setHours(0, 0, 0, 0)
 			const typeAdBD = await TypeAd.findOne({where: {size: typeAd}, raw: true})
 			const typeAdId = typeAdBD.id
 			//Бронирование дорогих плашек
