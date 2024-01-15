@@ -47,9 +47,12 @@ class chatController {
 						where users.senderId = ${userId} or users.receiverId = ${userId}
 						GROUP BY chats.id`
 			)
-			const [data,] = await chatDB.query(
-				`SELECT count(*) as count FROM messages where receiverRead=0 and senderId != ${userId} and chatId in (${ids.map(item => item.id).toString()});`)
-			return res.json(data[0])
+			if (ids.length > 0) {
+				const [data,] = await chatDB.query(
+					`SELECT count(*) as count FROM messages where receiverRead=0 and senderId != ${userId} and chatId in (${ids.map(item => item.id).toString()});`)
+				return res.json(data[0])
+			}
+			return res.json({count: 0})
 		} catch (e) {
 			return next(ApiError.badRequest(e.message))
 		}
@@ -59,33 +62,29 @@ class chatController {
     try {
 			const userId = req.user
 			let adsResult = []
+		console.log({userId})
 			const [data,] = await chatDB.query(
 				`SELECT
-								ranked_messages.id,
-								ranked_messages.adId,
-								ranked_messages.senderId,
-								ranked_messages.lastMessage,
-								ranked_messages.unreadCount
-						FROM (
-								SELECT
-										chats.id as id,
-										chats.adId as adId,
-										users.senderId as senderId,
-										messages.createdAt as lastMessage,
-										COUNT(unreadMessages.id) as unreadCount,
-										(SELECT COUNT(*)
-										 FROM messages as m
-										 WHERE m.chatId = messages.chatId AND m.createdAt > messages.createdAt) + 1 as row_num
-								FROM chats as chats
-								INNER JOIN chat_users as users ON users.chatId = chats.id
-								LEFT OUTER JOIN messages as messages ON messages.chatId = chats.id
-								LEFT OUTER JOIN messages as unreadMessages ON unreadMessages.chatId = chats.id
-										AND unreadMessages.receiverRead = 0 AND unreadMessages.senderId != ${userId}
-								WHERE chats.sellerId = ${userId} OR users.senderId = ${userId}
-								GROUP BY chats.id, chats.adId, users.senderId, messages.createdAt
-						) as ranked_messages
-						WHERE ranked_messages.row_num = 1
-						ORDER BY ranked_messages.lastMessage DESC;`)
+						subquery.adId,
+						subquery.senderId,
+						subquery.receiverId,
+						MIN(subquery.lastMessage) AS lastMessage,
+						COALESCE(SUM(subquery.unreadCount), 0) AS unreadCount
+					FROM (
+						SELECT
+							chats.adId,
+							users.senderId,
+							COALESCE(users.receiverId, 0) AS receiverId,
+							messages.createdAt AS lastMessage,
+							COUNT(CASE WHEN messages.receiverRead = 0 THEN 1 ELSE NULL END) AS unreadCount
+						FROM messages
+						LEFT JOIN chats ON messages.chatId = chats.id
+						LEFT JOIN chat_users AS users ON users.chatId = messages.chatId
+						WHERE users.senderId != messages.senderId
+						GROUP BY chats.adId, users.senderId, receiverId, messages.createdAt
+					) AS subquery
+					WHERE subquery.senderId = ${userId}
+					GROUP BY subquery.adId, subquery.senderId, subquery.receiverId;`)
 			const newData = data.reduce((o, i) => {
 				if (!o.find(v => v.id === i.id)) {
 					o.push(i);
@@ -94,7 +93,7 @@ class chatController {
 			}, []);
 			const adIds = newData.map(item => {
 				return {
-					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount]
+					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount, item.receiverId]
 				}
 			})
 			for (const obj of adIds) {
@@ -103,6 +102,7 @@ class chatController {
 				let lastMessage = obj[key][1]
 				let chatId = obj[key][2]
 				let unreadCount = obj[key][3]
+				let receiverId = obj[key][4]
 
 				const ads = await Ad.findOne({
 					where: {id: key},
@@ -119,14 +119,19 @@ class chatController {
 						required: false
 					}]
 				})
-				const user = await User.findOne({
+				const sender = await User.findOne({
 					where: {id: value},
 					attributes: ['id', 'name']
 				})
+				const receiver = await User.findOne({
+					where: {id: receiverId},
+					attributes: ['id', 'name']
+				})
+				console.log(receiver)
 				ads.dataValues['lastMessage'] = lastMessage
 				ads.dataValues['chat'] = chatId
 				ads.dataValues['unreadCount'] = unreadCount
-				adsResult.push([ads, user])
+				adsResult.push([ads, sender])
 			}
       return res.json(adsResult)
     } catch (e) {

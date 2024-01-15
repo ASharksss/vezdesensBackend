@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 const ApiError = require("../error/ApiError");
 const {User, Rating, Ad, Favorite, ImageAd,
-	StatusAd, TypeAd, Objects, AdView, UserAvatar
+	StatusAd, TypeAd, Objects, AdView, UserAvatar, PreviewImageAd
 } = require('../models')
 const {HTML_REGISTRATION, transporter} = require("../utils");
 
@@ -207,10 +207,12 @@ class UserController {
         where: {userId},
         include: {
           model: Ad,
-          include: [{model: StatusAd}, {model: Objects}, {model: ImageAd, required: false}, {
-						model: User,
-						attributes: ["name", "phone"]
-					}]
+          include: [
+              {model: StatusAd},
+              {model: Objects},
+              {model: ImageAd, required: false},
+              {model: User,attributes: ["name", "phone"]},
+              {model: PreviewImageAd,required: false}]
         }
       })
       return res.json(favorite)
