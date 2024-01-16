@@ -30,6 +30,11 @@ class UserController {
       const userDB = await User.findOne({
         where: {id: user.id},
         attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone'],
+        include: {
+          model: UserAvatar,
+          attributes: ['name'],
+          required: false
+        },
         raw: true
       })
       return res.json({token, username: userDB.login, profile: userDB})
@@ -91,6 +96,11 @@ class UserController {
       } else if (email === undefined) {
         user = await User.findOne({
           where: {login},
+          include: {
+            model: UserAvatar,
+            attributes: ['name'],
+            required: false
+          },
           raw: true
         })
       }

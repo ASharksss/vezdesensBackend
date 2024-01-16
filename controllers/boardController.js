@@ -31,13 +31,13 @@ class BoardController {
 					await allAds[i].save()
 				}
 				//Перебор всех бронирований
-				for (let i = 0; i < bookings.length; i++) {
+				for (let k = 0; k < bookings.length; k++) {
 					//Проверка на дату бронирования
-					if (bookings[i].dateEnd < currentDate) {
-						bookings[i].isActive = 0
+					if (bookings[k].dateEnd < currentDate) {
+						bookings[k].isActive = 0
 						allAds[i].typeAdId = 1
 						allAds[i].save()
-						bookings[i].save()
+						bookings[k].save()
 					}
 				}
 			}
@@ -276,6 +276,9 @@ class BoardController {
 
 	async getPremium(req, res, next) {
 		try {
+			const booking = await Booking.findAll({
+				where: [{isActive: true}]
+			})
 			const ads = await Ad.findAll({
 				where: [{statusAdId: 2}, {typeAdId: 4}],
 				include: [{
