@@ -84,7 +84,7 @@ class CategoriesController {
 
   async getCategoriesList(req, res, next) {
     try {
-			const {categoryId} = req.query
+			const {categoryId, object} = req.query
 			if (categoryId) {
 				const categories = await Category.findAll({
 					where: {id: categoryId},
@@ -98,32 +98,20 @@ class CategoriesController {
 						}
 					}]
 				})
-        let objectsArray = []
-        categories[0]['dataValues']['subCategories'].map(subCategoryItem => {
-          if(subCategoryItem.dataValues.objects.length > 0) {
-            subCategoryItem.dataValues.objects.map(objectItem => {
-              objectsArray.push(objectItem.dataValues.id)
-            })
-          }
-        })
-        const filter = await CharacteristicObject.findAll({
-          where: { objectId: { [Op.in]: objectsArray }},
-          attributes: ['id'],
-          include: {
-            model: Characteristic,
-						where: {required: true},
-            attributes: ['id', 'name'],
-            include: [{
-              model: TypeCharacteristic,
-              attributes: ['id', 'name']
-            }, {
-              model: CharacteristicValue,
-              attributes: ['id', 'name']
-            }]
-          },
-          raw: true
-        })
-        categories.push(...[groupByCharacteristic(filter)])
+                const filter = await CharacteristicObject.findAll({
+                    where: {objectId: object},
+                    attributes: ['id'],
+                    include: {
+                        model: Characteristic,
+                        include: [{model: CharacteristicValue, attributes: ['id', 'name']}, {
+                            model: TypeCharacteristic,
+                            attributes: ['name']
+                        }],
+                        attributes: ['name', 'required'],
+                        order: [['required', 'DESC'], ['name', 'ASC']]
+                    }
+                })
+                categories.push(...[filter])
 				return res.json(categories)
 			}
       const categories = await Category.findAll({
@@ -137,7 +125,6 @@ class CategoriesController {
 					}
         }
       })
-      console.log(categories)
       return res.json(categories)
     } catch (e) {
       return next(ApiError.badRequest(e.message))

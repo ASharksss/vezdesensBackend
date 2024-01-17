@@ -171,7 +171,7 @@ class UserController {
 					required: false
 				},{
             model: Ad,
-            include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
+            include: [{model: TypeAd}, {model: StatusAd}, {model: Objects}, {model: PreviewImageAd, required: false},
 							{model: Favorite, attributes: ['id']}, {model: ImageAd, required: false}]
         },{
             model: Rating,

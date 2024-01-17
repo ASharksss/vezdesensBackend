@@ -110,11 +110,6 @@ class AdController {
 						userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost
 					})
 				}
-
-				let previewName = uuid.v4() + '.jpg'
-				await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
-				await PreviewImageAd.create({adId: ad.id, name: previewName})
-
 			} else {
 				// Создаем объявление без брони
 				ad = await Ad.create({
@@ -163,6 +158,10 @@ class AdController {
 					}
 				})
 			}
+
+			let previewName = uuid.v4() + '.jpg'
+			await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
 				let fileName = uuid.v4() + '.jpg'
@@ -219,6 +218,7 @@ class AdController {
 						required: false
 					}, {
 						model: User,
+						attributes: ['id', 'login', 'email', 'phone', 'name'],
 						include: {
 							model: Rating,
 							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
@@ -517,6 +517,10 @@ class AdController {
 					model: ImageAd,
 					attributes: ['name'],
 					required: false
+				}, {
+					model: PreviewImageAd,
+					attributes: ['name'],
+					required: false
 				}]
 			})
 			if (ad === null) {
@@ -612,9 +616,39 @@ class AdController {
 					}
 				});
 			})
+
+
+			const previewImagesDB = await PreviewImageAd.findAll({
+				where: {adId: id},
+				raw: true
+			})
+			previewImagesDB.map(async (item) => {
+				let fileName = item.name
+				const filePath = path.resolve(__dirname, '..', 'static', fileName);
+				await fs.unlink(filePath, (err) => {
+					if (err) {
+						console.error('Ошибка при удалении файла:', err);
+					} else {
+						console.log('Файл успешно удален');
+					}
+				});
+			})
+
 			await ImageAd.destroy({
 				where: {adId: id}
 			})
+			await PreviewImageAd.destroy({
+				where: {adId: id}
+			})
+
+			const previewName = uuid.v4() + '.jpg'
+			try {
+				await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+				await PreviewImageAd.create({adId: ad.id, name: previewName})
+			} catch (e) {
+				console.log(e)
+			}
+
 			if (images.length === undefined) {
 				let fileName = uuid.v4() + '.jpg'
 				await images.mv(path.resolve(__dirname, '..', 'static', fileName))

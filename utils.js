@@ -81,7 +81,6 @@ function decryptArrayWithKey(encryptedString) {
 
 function groupByCharacteristic(data) {// группировка для фильтра
     const result = [];                // удаляет дубликаты и приводит в нормальный читаемый вид
-    console.log(data.length)
     data.forEach((item, index) => {
         if(Math.floor(data.length / 2) < index + 1)
             return
