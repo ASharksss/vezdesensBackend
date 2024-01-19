@@ -218,7 +218,7 @@ class AdController {
 						required: false
 					}, {
 						model: User,
-						attributes: ['id', 'login', 'email', 'phone', 'name'],
+						attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt'],
 						include: {
 							model: Rating,
 							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],

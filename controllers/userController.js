@@ -131,10 +131,14 @@ class UserController {
 			let reviews = await Rating.findAll({
 				where: {sellerId},
 				attributes: ['id', 'createdAt', 'grade', 'text'],
-				include: [{
-					model: User,
-					attributes: ['id', 'login', 'name']
-				}]
+                include: [{
+                    model: User,
+                    attributes: ['id', 'login', 'name'],
+                    include: {
+                        model: UserAvatar,
+                        attributes: ['name']
+                    }
+                }]
 			})
       return res.json(reviews)
     } catch (e) {
@@ -150,7 +154,11 @@ class UserController {
 				attributes: ['id', 'createdAt', 'grade', 'text'],
 				include: [{
 					model: User,
-					attributes: ['id', 'login', 'name']
+					attributes: ['id', 'login', 'name'],
+                    include: {
+                        model: UserAvatar,
+                        attributes: ['name']
+                    }
 				}]
 			})
       return res.json(reviews)
