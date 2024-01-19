@@ -19,6 +19,7 @@ class BoardController {
 				commercialOffset = parseInt(offset.split('|')[1]),
 				vipOffset = parseInt(offset.split('|')[2])
 			const currentDate = new Date()
+			currentDate.setHours(0, 0, 0, 0)
 			const userId = req.user
 			allAds = await Ad.findAll()
 			bookings = await Booking.findAll()
@@ -33,7 +34,7 @@ class BoardController {
 				//Перебор всех бронирований
 				for (let k = 0; k < bookings.length; k++) {
 					//Проверка на дату бронирования
-					if (bookings[k].dateEnd < currentDate) {
+					if (bookings[k].dateEnd < currentDate && bookings[k].isActive === 1) {
 						bookings[k].isActive = 0
 						allAds[i].typeAdId = 1
 						allAds[i].save()
