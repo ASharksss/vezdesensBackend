@@ -18,27 +18,27 @@ class BoardController {
 				blockOffset = parseInt(offset.split('|')[0]),
 				commercialOffset = parseInt(offset.split('|')[1]),
 				vipOffset = parseInt(offset.split('|')[2])
+			const userId = req.user
 			const currentDate = new Date()
 			currentDate.setHours(0, 0, 0, 0)
-			const userId = req.user
 			allAds = await Ad.findAll()
 			bookings = await Booking.findAll()
 
 			//Перебор всех объявлений
-			for (let i = 0; i < allAds.length; i++) {
+			for (const ad of allAds) {
 				//Проверка на просроченные объявления
-				if (allAds[i].dateEndActive < currentDate) {
-					allAds[i].statusAdId = 3
-					await allAds[i].save()
+				if (new Date(ad.dateEndActive) < currentDate) {
+					ad.statusAdId = 3
+					await ad.save()
 				}
 				//Перебор всех бронирований
-				for (let k = 0; k < bookings.length; k++) {
+				for (const booking of bookings) {
 					//Проверка на дату бронирования
-					if (bookings[k].dateEnd < currentDate && bookings[k].isActive === 1) {
-						bookings[k].isActive = 0
-						allAds[i].typeAdId = 1
-						allAds[i].save()
-						bookings[k].save()
+					if (new Date(booking.dateEnd) < currentDate && booking.isActive === true) {
+						booking.isActive = 0
+						ad.typeAdId = 1
+						await ad.save()
+						await booking.save()
 					}
 				}
 			}
@@ -103,7 +103,7 @@ class BoardController {
 			if (!subCategoryId && !objectId) {
 				ads = await Ad.findAll({
 					where: {
-						[Op.or]: [{statusAdId: 1}, {statusAdId: 2}],
+						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}],
 						typeAdId: 1
 					},
 					include: [{
@@ -124,13 +124,14 @@ class BoardController {
 						model: PreviewImageAd,
 						required: false
 					}],
+					order: [['createdAt', 'DESC']],
 					limit: 15,
 					offset: blockOffset
 				})
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
-						[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]
+						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
 					},
 					include: [{
 						model: Objects,
@@ -162,7 +163,7 @@ class BoardController {
 				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
-						[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]
+						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
 					},
 					include: [{
 						model: Objects,
@@ -278,29 +279,33 @@ class BoardController {
 	async getPremium(req, res, next) {
 		try {
 			const booking = await Booking.findAll({
-				where: [{isActive: true}]
-			})
-			const ads = await Ad.findAll({
-				where: [{statusAdId: 2}, {typeAdId: 4}],
-				include: [{
-					model: Objects,
+				where: [{isActive: true}],
+				include: {
+					model: Ad,
+					where: [{statusAdId: 2}, {typeAdId: 4}],
 					include: [{
-						model: SubCategory,
-						include: Category
-					}]
-				}, {
-					model: TypeAd
-				}, {
-					model: User
-				}, {
-					model: ImageAd,
-					required: false
-				}, {
-					model: PreviewImageAd,
-					required: false
-				}],
+						model: Objects,
+						include: [{
+							model: SubCategory,
+							include: Category
+						}]
+					}, {
+						model: TypeAd
+					}, {
+						model: User,
+						attributes: ['login', 'phone', 'createdAt', 'email']
+					}, {
+						model: ImageAd,
+						required: false
+					}, {
+						model: PreviewImageAd,
+						required: false
+					}],
+				},
+				order: [['position', 'DESC']]
 			})
-			return res.json({ads})
+			const ads = booking.map(item => item.dataValues.ad)
+			return res.json(ads)
 		} catch (e) {
 			console.log(e)
 			return next(ApiError.badRequest(e.message))

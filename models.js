@@ -9,6 +9,7 @@ const Ad = sequelize.define('ad', {
   address: {type: DataTypes.STRING, allowNull: false},
   longevity: {type: DataTypes.INTEGER, defaultValue: 30},
   views: {type: DataTypes.INTEGER, defaultValue: 0},
+  showPhone: {type: DataTypes.INTEGER, defaultValue: 0},
   dateEndActive: {type: DataTypes.DATE}
 })
 
@@ -59,6 +60,7 @@ const Booking = sequelize.define('booking', {
   dateStart: {type: DataTypes.DATE, allowNull: false},
   dateEnd: {type: DataTypes.DATE, allowNull: false},
   cost: {type: DataTypes.INTEGER},
+  position: {type: DataTypes.STRING},
   isActive: {type: DataTypes.BOOLEAN, defaultValue: true}
 })
 
@@ -150,6 +152,13 @@ const PositionCity = sequelize.define('positionCity', {
 const PositionStreets = sequelize.define('positionStreets', {
 	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
 	name: {type: DataTypes.STRING, allowNull: false}
+})
+const StaticAd = sequelize.define('staticAd', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  dateStart: {type: DataTypes.DATE, allowNull: false},
+  dateEnd: {type: DataTypes.DATE, allowNull: false},
+  imageName: {type: DataTypes.STRING, allowNull: false},
+  href: {type: DataTypes.STRING, allowNull: false}
 })
 
 //Relationships
@@ -292,7 +301,7 @@ module.exports = {
   Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
   CharacteristicSubCategory, CharacteristicObject, Characteristic, UserAvatar,
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
-  Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd,
+  Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd, StaticAd,
   Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets
 }
 

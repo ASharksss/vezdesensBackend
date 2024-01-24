@@ -20,7 +20,7 @@ router.use('/categories', CategoriesRouter)
 router.use('/characteristic', characteristicRouter)
 router.use('/board', auth.isAuthorized, boardRouter)
 router.use('/chat', auth.isAuthorized, chatRouter)
-router.use('/static', otherRouter)
+router.use('/other', otherRouter)
 router.use('/position', positionRouter)
 
 

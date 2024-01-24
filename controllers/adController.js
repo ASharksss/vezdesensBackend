@@ -17,11 +17,9 @@ class AdController {
 
 		try {
 			const {
-				title, price, description,
-				address, longevity,
-				typeAd, statusAdId, objectId,
-				bookingDateStart, bookingDateEnd, characteristicsInput,
-				characteristicsSelect
+				title, price, description, address, longevity, showPhone,
+				typeAd, statusAdId, objectId, bookingDateStart, bookingDateEnd,
+				characteristicsInput, characteristicsSelect, position
 			} = req.body
 
 			const {images} = req.files
@@ -60,9 +58,8 @@ class AdController {
 
 					//Создаем объявление
 					ad = await Ad.create({
-						title, price, description,
-						address, longevity, userId,
-						typeAdId, statusAdId, objectId,
+						title, price, description, showPhone, objectId,
+						address, longevity, userId, typeAdId, statusAdId,
 						dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
 					})
 
@@ -107,15 +104,14 @@ class AdController {
 
 					//Запись бронирования
 					await Booking.create({
-						userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost
+						userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost, position
 					})
 				}
 			} else {
 				// Создаем объявление без брони
 				ad = await Ad.create({
-					title, price, description,
-					address, longevity, userId,
-					typeAdId, statusAdId, objectId,
+					title, price, description, showPhone, address,
+					longevity, userId, typeAdId, statusAdId, objectId,
 					dateEndActive: new Date(currentDate.setDate(currentDate.getDate() + 30)) //Дата окончания показов
 				})
 
@@ -456,6 +452,20 @@ class AdController {
 				}]
 			})
 			return res.json(ads)
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
+	}
+
+	async getPremiumDate(req, res, next) {
+		try {
+			const {position} = req.query
+			const booking = await Booking.findAll({
+				where: [{isActive: true}, {position}, {typeAdId: 4}],
+				attributes: ['dateStart', 'dateEnd'],
+				raw: true
+			})
+			return res.json(booking)
 		} catch (e) {
 			return next(ApiError.badRequest(e.message))
 		}
