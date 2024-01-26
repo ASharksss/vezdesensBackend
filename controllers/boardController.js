@@ -42,6 +42,30 @@ class BoardController {
 					}
 				}
 			}
+			const includeArray = [
+				{
+					model: Objects,
+					where: [ { subCategoryId: subCategoryId } ],
+					include: [ {
+							model: SubCategory,
+							include: Category
+						}]
+				}, {model: TypeAd},
+				{model: User},
+				{
+					model: PreviewImageAd,
+					required: false
+				}
+			]
+
+			if (userId !== null) {
+				includeArray.push({
+					model: Favorite,
+					where: { userId },
+					required: false
+				})
+			}
+
 			if(query) { // для фильтров
 				const decryptHash = decryptArrayWithKey(query)
 				const charactericticsIds = [], characteristicsValuesIds = []
@@ -103,8 +127,7 @@ class BoardController {
 			if (!subCategoryId && !objectId) {
 				ads = await Ad.findAll({
 					where: {
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}],
-						typeAdId: 1
+						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
 					},
 					include: [{
 						model: Objects,
@@ -205,27 +228,7 @@ class BoardController {
 						{typeAdId: 1},
 						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
 					],
-					include: [{
-						model: Objects,
-						where: [
-							{subCategoryId: subCategoryId}
-						],
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					}, {
-						model: TypeAd
-					}, {
-						model: User
-					}, userId!==null ? {
-						model: Favorite,
-						where: {userId},
-						required: false
-					} : null, {
-						model: PreviewImageAd,
-						required: false
-					}],
+					include: includeArray,
 					order: literal('rand()'),
 					limit: 20,
 					offset: parseInt(offset)
