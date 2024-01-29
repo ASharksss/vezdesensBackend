@@ -225,7 +225,6 @@ class BoardController {
 				ads = await Ad.findAll({
 					where: [
 						{id: {[Op.notIn]: ignoreIds}},
-						{typeAdId: 1},
 						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
 					],
 					include: includeArray,
