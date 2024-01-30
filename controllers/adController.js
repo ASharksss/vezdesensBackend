@@ -7,7 +7,7 @@ const {
 	AdView, Favorite, ImageAd,
 	AdCharacteristicInput, AdCharacteristicSelect, User,
 	Rating, StatusAd, Objects,
-	Characteristic, CharacteristicValue, PreviewImageAd, CharacteristicObject, TypeCharacteristic
+	Characteristic, CharacteristicValue, PreviewImageAd, CharacteristicObject, TypeCharacteristic, SubCategory, Category
 } = require('../models');
 const {Op} = require("sequelize");
 
@@ -188,6 +188,17 @@ class AdController {
 				ad = await Ad.findOne({
 					where: [{id: adId}],
 					include: [{
+						model: Objects,
+						attributes: ['id', 'name'],
+						include: [{
+							model: SubCategory,
+							attributes: ['id', 'name'],
+							include: [{
+								model: Category,
+								attributes: ['id', 'name']
+							}]
+						}]
+					}, {
 						model: AdCharacteristicInput,
 						attributes: ['id', 'value'],
 						required: false,
@@ -232,6 +243,17 @@ class AdController {
 				ad = await Ad.findOne({
 					where: [{id: adId}],
 					include: [{
+						model: Objects,
+						attributes: ['id', 'name'],
+						include: [{
+							model: SubCategory,
+							attributes: ['id', 'name'],
+							include: [{
+								model: Category,
+								attributes: ['id', 'name']
+							}]
+						}]
+					}, {
 						model: AdCharacteristicInput,
 						attributes: ['id', 'value'],
 						required: false,

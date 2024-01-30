@@ -3,7 +3,8 @@ const {
 	Ad, Objects,
 	SubCategory, Category,
 	TypeAd, User, Booking,
-	Favorite, ImageAd, CharacteristicObject, Characteristic, AdCharacteristicInput, PreviewImageAd
+	Favorite, ImageAd, CharacteristicObject,
+	AdCharacteristicInput, PreviewImageAd
 } = require('../models')
 const {Op, literal} = require("sequelize");
 const {decryptArrayWithKey} = require("../utils");
@@ -127,7 +128,8 @@ class BoardController {
 			if (!subCategoryId && !objectId) {
 				ads = await Ad.findAll({
 					where: {
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
+						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}],
+						typeAdId: 1
 					},
 					include: [{
 						model: Objects,
@@ -151,6 +153,7 @@ class BoardController {
 					limit: 15,
 					offset: blockOffset
 				})
+				console.log(ads.length)
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
@@ -215,6 +218,7 @@ class BoardController {
 				vipOffset += adsVip.length
 				ads.push(...adsCommercial)
 				ads.push(...adsVip)
+				console.log(ads.length)
 			}
 
 			if (subCategoryId && !objectId) {
@@ -257,11 +261,11 @@ class BoardController {
 							model: TypeAd
 						}, {
 							model: User
-						}, userId !== null ? {
+						}, {
 							model: Favorite,
 							where: {userId},
 							required: false
-						} : null, {
+						}	, {
 							model: PreviewImageAd,
 							required: false
 						}],
