@@ -10,10 +10,10 @@ const router = require('./routes/index')
 const errorHandler = require('./middleware/ErrorHandingMiddleware')
 
 const PORT = process.env.PORT
-const originAccess = process.env.originAccess || ['https://vezdesens.ru']
+const originAccess = process.env.originAccess || '["https://vezdesens.ru"]'
 
 const app = express()
-app.use(cors({ credentials: true, origin: originAccess,
+app.use(cors({ credentials: true, origin: JSON.parse(originAccess),
 	allowedHeaders: ['Content-Type', 'Authorization'], methods: ['GET', 'POST', 'OPTIONS', 'DELETE']}))
 app.use(express.json())
 app.use(cookieParser());
