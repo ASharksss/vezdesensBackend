@@ -25,6 +25,9 @@ app.use('/api', router)
 //Обработка ошибок последний middleware
 app.use(errorHandler)
 
+app.get('/ping', (req, res) => {
+  res.json('pong')
+})
 
 const start = async () => {
   try {
