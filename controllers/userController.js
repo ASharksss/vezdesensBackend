@@ -218,6 +218,7 @@ class UserController {
   async getFavorite(req, res, next) {
     try {
       const userId = req.user
+        console.log(userId)
       if (userId === null || userId === undefined) {
         return res.json(ApiError.forbidden('Ошибка токена'))
       }

@@ -2,17 +2,18 @@ const uuid = require('uuid');
 const ApiError = require("../error/ApiError");
 const {
     Ad, AdCharacteristicInput, AdCharacteristicSelect,
-    Objects, SubCategory, Category, PreviewImageAd
+    Objects, SubCategory, Category, PreviewImageAd, Favorite
 } = require('../models');
 const {Op} = require("sequelize");
 
 class SearchController {
     async search(req, res, next) {
         try {
-            const {query, object, subCategory, category, offset=0} = req.query
-            let objectIds = [], objectValues = [], price= [0, 1500000000], ads = null
-            if (query !== undefined)
-                query.indexOf(', ') > 0 ? query.split(', ') : [query].map(item => {
+            const {query, object, subCategory, category, offset = 0} = req.query;
+            const userId = req.user;
+            let objectIds = [], objectValues = [], price = [0, 1500000000], allAds = null;
+            if (query !== undefined) {
+                query.indexOf(', ') > 0 ? query.split(', ') : [query.toString()].map(item => {
                     const id = item.split('=')[0], value = item.split('=')[1]
                     if (id !== 'price') {
                         objectIds.push(parseInt(id))
@@ -21,15 +22,16 @@ class SearchController {
                         price = value.split('-').map(Number)
                     }
                 })
+            }
             let selectsArray = [], inputsArray = []
-            for (let i=0; i < objectIds.length; i++) {
+            for (let i = 0; i < objectIds.length; i++) {
                 let id = objectIds[i], value = objectValues[i]
-                if (Array.isArray(value)){
+                if (Array.isArray(value)) {
                     selectsArray.push({
                         characteristicId: id,
                         characteristicValueId: {[Op.in]: value}
                     })
-                } else if(typeof value === 'string') {
+                } else if (typeof value === 'string') {
                     inputsArray.push({
                         characteristicId: id,
                         value: value.indexOf('-') > 0 ? {[Op.between]: value.split('-').map(Number)} : value
@@ -54,8 +56,8 @@ class SearchController {
             if (inputsArray.length > 0) {
                 inputsInclude.where = {[Op.or]: inputsArray}
             }
-            if (object !== undefined){
-                ads = await SubCategory.findAll({
+            if (object !== undefined) {
+                allAds = await SubCategory.findAll({
                     attributes: ['id', 'name'],
                     where: {id: subCategory},
                     include: [{
@@ -70,12 +72,16 @@ class SearchController {
                             model: Ad,
                             where: {
                                 price: {[Op.between]: price},
-                                statusAdId: {[Op.or]: [2,4]}
+                                statusAdId: {[Op.or]: [2, 4]}
                             },
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {
                                 model: PreviewImageAd,
                                 attributes: ['name']
+                            }, {
+                                model: Favorite,
+                                where: {userId},
+                                required: false
                             }]
                         }
                     }],
@@ -83,7 +89,7 @@ class SearchController {
                     offset: parseInt(offset)
                 })
             } else {
-                ads = await SubCategory.findAll({
+                allAds = await SubCategory.findAll({
                     attributes: ['id', 'name'],
                     where: {id: subCategory},
                     include: [{
@@ -97,12 +103,16 @@ class SearchController {
                             model: Ad,
                             where: {
                                 price: {[Op.between]: price},
-                                statusAdId: {[Op.or]: [2,4]}
+                                statusAdId: {[Op.or]: [2, 4]}
                             },
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {
                                 model: PreviewImageAd,
                                 attributes: ['name']
+                            }, {
+                                model: Favorite,
+                                where: {userId: userId !== undefined ? userId : null},
+                                required: false
                             }]
                         }
                     }],
@@ -110,7 +120,27 @@ class SearchController {
                     offset: parseInt(offset)
                 })
             }
-            return res.json({ads, offset: ads.length})
+            let newArray = []
+            if (userId === null) {
+                if (allAds.length > 0)
+                    newArray = allAds[0].dataValues.objects.flatMap(object =>
+                        object.dataValues.ads.map(item => {
+                            const {favorites, ...rest} = item.dataValues;
+                            return rest;
+                        })
+                    );
+            }
+            if (userId !== null) {
+                if (allAds.length > 0)
+                    newArray = allAds[0].dataValues.objects.flatMap(object =>
+                        object.dataValues.ads.map(item => ({
+                            ...item.dataValues,
+                            favorites: item.dataValues.favorites.length > 0
+                        }))
+                    );
+            }
+
+            return res.json({ads: newArray, offset: newArray.length})
         } catch (e) {
             console.log(e)
             return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
