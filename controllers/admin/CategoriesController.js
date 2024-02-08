@@ -107,7 +107,7 @@ class CategoriesController {
                             model: TypeCharacteristic,
                             attributes: ['name']
                         }],
-                        attributes: ['name', 'required'],
+                        attributes: ['id', 'name', 'required'],
                         order: [['required', 'DESC'], ['name', 'ASC']]
                     }
                 })

@@ -2,7 +2,8 @@ const uuid = require('uuid');
 const ApiError = require("../error/ApiError");
 const {
     Ad, AdCharacteristicInput, AdCharacteristicSelect,
-    Objects, SubCategory, Category, PreviewImageAd, Favorite
+    Objects, SubCategory, Category,
+    PreviewImageAd, Favorite
 } = require('../models');
 const {Op} = require("sequelize");
 
@@ -13,15 +14,25 @@ class SearchController {
             const userId = req.user;
             let objectIds = [], objectValues = [], price = [0, 1500000000], allAds = null;
             if (query !== undefined) {
-                query.indexOf(', ') > 0 ? query.split(', ') : [query.toString()].map(item => {
-                    const id = item.split('=')[0], value = item.split('=')[1]
+                if (query.indexOf(', ') > 0) {
+                    query.split(', ').map(item => {
+                        const id = item.split('=')[0], value = item.split('=')[1]
+                        if (id !== 'price') {
+                            objectIds.push(parseInt(id))
+                            objectValues.push(value.indexOf('-') === 1 ? value : JSON.parse(value))
+                        } else {
+                            price = value.split('-').map(Number)
+                        }
+                    })
+                } else {
+                    const id = query.split('=')[0], value = query.split('=')[1]
                     if (id !== 'price') {
                         objectIds.push(parseInt(id))
                         objectValues.push(value.indexOf('-') === 1 ? value : JSON.parse(value))
                     } else {
                         price = value.split('-').map(Number)
                     }
-                })
+                }
             }
             let selectsArray = [], inputsArray = []
             for (let i = 0; i < objectIds.length; i++) {
