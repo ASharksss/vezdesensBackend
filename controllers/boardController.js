@@ -51,9 +51,10 @@ class BoardController {
 							model: SubCategory,
 							include: Category
 						}]
-				}, {model: TypeAd},
-				{model: User},
-				{
+				}, {model: TypeAd}, {
+					model: User,
+					attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+				}, {
 					model: PreviewImageAd,
 					required: false
 				}
@@ -141,7 +142,8 @@ class BoardController {
 					}, {
 						model: TypeAd
 					}, {
-						model: User
+						model: User,
+						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -169,7 +171,8 @@ class BoardController {
 					}, {
 						model: TypeAd
 					}, {
-						model: User
+						model: User,
+						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -201,7 +204,8 @@ class BoardController {
 					}, {
 						model: TypeAd
 					}, {
-						model: User
+						model: User,
+						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -261,7 +265,8 @@ class BoardController {
 						}, {
 							model: TypeAd
 						}, {
-							model: User
+							model: User,
+							attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 						}, {
 							model: Favorite,
 							where: {userId},

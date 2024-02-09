@@ -230,7 +230,8 @@ class AdController {
 							model: Rating,
 							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
 							include: {
-								model: User
+								model: User,
+								attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 							}
 						}
 					}, {
@@ -279,11 +280,13 @@ class AdController {
 						required: false
 					}, {
 						model: User,
+						attributes: ['id', 'login', 'createdAt', 'phone', 'name'],
 						include: {
 							model: Rating,
 							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
 							include: {
-								model: User
+								model: User,
+								attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 							}
 						}
 					}, {
@@ -425,7 +428,8 @@ class AdController {
 				where: {userId},
 				include: {
 					model: Ad,
-					include: [{model: StatusAd}, {model: Objects}, {model: ImageAd, required: false}, {model: User}]
+					include: [{model: StatusAd}, {model: Objects}, {model: ImageAd, required: false}, {
+						model: User, attributes: ['id', 'login', 'createdAt', 'phone', 'name']}]
 				}
 			})
 			return res.json(favorite)
