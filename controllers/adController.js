@@ -7,9 +7,11 @@ const {
 	AdView, Favorite, ImageAd,
 	AdCharacteristicInput, AdCharacteristicSelect, User,
 	Rating, StatusAd, Objects,
-	Characteristic, CharacteristicValue, PreviewImageAd, CharacteristicObject, TypeCharacteristic, SubCategory, Category
+	Characteristic, CharacteristicValue, PreviewImageAd,
+	CharacteristicObject, TypeCharacteristic, SubCategory, Category
 } = require('../models');
 const {Op} = require("sequelize");
+const {resizeImage} = require("../utils");
 
 class AdController {
 
@@ -155,18 +157,19 @@ class AdController {
 				})
 			}
 
-			let previewName = uuid.v4() + '.jpg'
-			await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+			let previewName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
+			let cardType = typeAdId === 1 ? 'st' : typeAdId === 2 ? 'stPl' : typeAdId === 3 ? 'vip' : 'premium'
+			await resizeImage(previewImage.data, previewName, cardType)
 			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
-				let fileName = uuid.v4() + '.jpg'
-				await images.mv(path.resolve(__dirname, '..', 'static', fileName))
+				let fileName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
+				await resizeImage(images.data, fileName, 'st')
 				await ImageAd.create({adId: ad.id, name: fileName})
 			} else {
 				images.map(async (image) => {
-					let fileName = uuid.v4() + '.jpg'
-					await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+					let fileName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
+					await resizeImage(image.data, fileName, 'st')
 					await ImageAd.create({adId: ad.id, name: fileName})
 				})
 			}
@@ -204,7 +207,7 @@ class AdController {
 						required: false,
 						include: {
 							model: Characteristic,
-							attributes: ['name']
+							attributes: ['name', 'required']
 						}
 					}, {
 						model: AdCharacteristicSelect,
@@ -212,7 +215,7 @@ class AdController {
 						required: false,
 						include: [{
 							model: Characteristic,
-							attributes: ['name']
+							attributes: ['name', 'required']
 						}, {
 							model: CharacteristicValue,
 							attributes: ['name']

@@ -1,7 +1,8 @@
 const nodemailer = require('nodemailer');
+const sharp = require("sharp");
 
 const EMAIL_USER = process.env.EMAIL_USER
-const EMAIL_PASSWORD=process.env.EMAIL_PASSWORD
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
 
 const HTML_REGISTRATION = (login, phone) => `<!DOCTYPE html>
 <html>
@@ -52,63 +53,149 @@ const HTML_REGISTRATION = (login, phone) => `<!DOCTYPE html>
 </html>`
 
 const transporter = nodemailer.createTransport({
-	host: 'smtp.beget.com',
-	port: 465,
-	secure: true,
-	auth: {
-		user: EMAIL_USER,
-		pass: EMAIL_PASSWORD
-	}
+    host: 'smtp.beget.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASSWORD
+    }
 });
 
 const key = process.env.FRONT_KEY
+
 function decryptStringWithKey(encryptedString, key) {
-	let decryptedString = "";
-	for (let i = 0; i < encryptedString.length; i++) {
-		const charCode = encryptedString.charCodeAt(i);
-		const keyChar = key.charCodeAt(i % key.length);
-		const decryptedCharCode = charCode - keyChar;
-		decryptedString += String.fromCharCode(decryptedCharCode);
-	}
-	return decryptedString;
+    let decryptedString = "";
+    for (let i = 0; i < encryptedString.length; i++) {
+        const charCode = encryptedString.charCodeAt(i);
+        const keyChar = key.charCodeAt(i % key.length);
+        const decryptedCharCode = charCode - keyChar;
+        decryptedString += String.fromCharCode(decryptedCharCode);
+    }
+    return decryptedString;
 }
 
 function decryptArrayWithKey(encryptedString) {
-	const decryptedString = decryptStringWithKey(encryptedString, key);
-	const decryptedArray = JSON.parse(decryptedString);
-	return decryptedArray;
+    const decryptedString = decryptStringWithKey(encryptedString, key);
+    const decryptedArray = JSON.parse(decryptedString);
+    return decryptedArray;
 }
 
 function groupByCharacteristic(data) {// группировка для фильтра
     const result = [];                // удаляет дубликаты и приводит в нормальный читаемый вид
     data.forEach((item, index) => {
-        if(Math.floor(data.length / 2) < index + 1)
+        if (Math.floor(data.length / 2) < index + 1)
             return
         console.log(Math.floor(data.length / 2) <= (index + 1))
-       const existItem = result.find(i => i.id === item['characteristic.id']);
-       if (!existItem) {
+        const existItem = result.find(i => i.id === item['characteristic.id']);
+        if (!existItem) {
             result.push({
                 id: item['characteristic.id'],
                 name: item['characteristic.name'],
                 typeCharacteristic: item['characteristic.typeCharacteristic.name'],
                 characteristicValues: [
                     item['characteristic.typeCharacteristic.name'] === 'enter' ? null : {
-                    id: item['characteristic.characteristicValues.id'],
-                    name: item['characteristic.characteristicValues.name']
-                }]
+                        id: item['characteristic.characteristicValues.id'],
+                        name: item['characteristic.characteristicValues.name']
+                    }]
             });
-       } else {
+        } else {
             existItem['characteristicValues'].push({
                 id: item['characteristic.characteristicValues.id'],
                 name: item['characteristic.characteristicValues.name']
             });
-       }
+        }
     });
     return result;
 }
 
+const resizeImage = async (image, fileName, cardType = 'st') => {
+    try {
+        switch (cardType) {
+            case "st":
+                await sharp(image)
+                    .resize({
+                        width: 248,
+                        height: 333,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                await sharp(image)
+                    .resize({
+                        width: 156,
+                        height: 210,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                break;
+            case "stPl":
+                await sharp(image)
+                    .resize({
+                        width: 315,
+                        height: 417,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                await sharp(image)
+                    .resize({
+                        width: 156,
+                        height: 210,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/mob/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                break;
+            case "vip":
+                await sharp(image)
+                    .resize({
+                        width: 690,
+                        height: 417,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                await sharp(image)
+                    .resize({
+                        width: 325,
+                        height: 189,
+                        fit: sharp.fit.cover
+                    })
+                    .toFile(`static/mob/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                break;
+            case "premium":
+                await sharp(image)
+                    .resize(1400, 417)
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                await sharp(image)
+                    .resize(325, 189)
+                    .toFile(`static/mob/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                break;
+
+            default:
+                break;
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 module.exports = {
-	decryptArrayWithKey,
+    decryptArrayWithKey,
     groupByCharacteristic,
-	transporter, HTML_REGISTRATION
+    transporter, HTML_REGISTRATION,
+    resizeImage
 }
