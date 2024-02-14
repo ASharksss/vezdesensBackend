@@ -136,22 +136,22 @@ const UserChat = sequelize.define('userChat', {
 })
 
 const PositionDistrict = sequelize.define('positionDistrict', {
-	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-	name: {type: DataTypes.STRING, allowNull: false}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING, allowNull: false}
 })
 const PositionRegion = sequelize.define('positionRegion', {
-	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-	name: {type: DataTypes.STRING, allowNull: false}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING, allowNull: false}
 })
 const PositionCity = sequelize.define('positionCity', {
-	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-	latitude: {type: DataTypes.FLOAT, allowNull: true},
-	longitude: {type: DataTypes.FLOAT, allowNull: true},
-	name: {type: DataTypes.STRING, allowNull: false}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  latitude: {type: DataTypes.FLOAT, allowNull: true},
+  longitude: {type: DataTypes.FLOAT, allowNull: true},
+  name: {type: DataTypes.STRING, allowNull: false}
 })
 const PositionStreets = sequelize.define('positionStreets', {
-	id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-	name: {type: DataTypes.STRING, allowNull: false}
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING, allowNull: false}
 })
 const StaticAd = sequelize.define('staticAd', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -160,6 +160,33 @@ const StaticAd = sequelize.define('staticAd', {
   imageName: {type: DataTypes.STRING, allowNull: false},
   href: {type: DataTypes.STRING, allowNull: false}
 })
+
+//Support
+
+const TopicOfAppeal = sequelize.define('topicOfAppeal', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
+const StatusOfAppeal = sequelize.define('statusOfAppeal', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
+const Appeal = sequelize.define('appeal', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
+})
+
+const ResponseSupport = sequelize.define('responseSupport', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  text: {type: DataTypes.STRING}
+})
+
+const Message = sequelize.define('message', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  text: {type: DataTypes.STRING}
+})
+
 
 //Relationships
 
@@ -297,11 +324,28 @@ PositionCity.belongsTo(PositionRegion)
 PositionCity.hasMany(PositionStreets)
 PositionStreets.belongsTo(PositionCity)
 
+//Поддержка
+User.hasMany(Appeal)
+Appeal.belongsTo(User)
+
+TopicOfAppeal.hasMany(Appeal)
+Appeal.belongsTo(TopicOfAppeal)
+
+StatusOfAppeal.hasMany(Appeal)
+Appeal.belongsTo(StatusOfAppeal)
+
+Appeal.hasMany(Message)
+Message.belongsTo(Appeal)
+
+Message.hasMany(ResponseSupport)
+ResponseSupport.belongsTo(Message)
+
 module.exports = {
   Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
   CharacteristicSubCategory, CharacteristicObject, Characteristic, UserAvatar,
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd, StaticAd,
-  Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets
+  Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets, TopicOfAppeal,
+  StatusOfAppeal, Appeal, ResponseSupport, Message
 }
 

@@ -12,6 +12,7 @@ const CategoriesRouter = require('./admin/CategoriesRouter')
 const characteristicRouter = require('./admin/CharacteristicRouter')
 const otherRouter = require('./otherRouter')
 const searchRouter = require('./searchRouter')
+const supportRouter = require('./supportRouter')
 const auth = require('../middleware/AuthHandingMiddleware')
 
 
@@ -24,6 +25,7 @@ router.use('/search', searchRouter)
 router.use('/chat', auth.isAuthorized, chatRouter)
 router.use('/other', otherRouter)
 router.use('/position', positionRouter)
+router.use('/support', supportRouter)
 
 
 module.exports = router
