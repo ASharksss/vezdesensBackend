@@ -128,7 +128,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         height: 210,
                         fit: sharp.fit.cover
                     })
-                    .toFile(`static/${fileName}`, (err, info) => {
+                    .toFile(`static/mob/${fileName}`, (err, info) => {
                         if(err) console.log(err)
                     })
                 break;
@@ -152,7 +152,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         if(err) console.log(err)
                     })
                 break;
-            case "vip":
+            case "vp":
                 await sharp(image)
                     .resize({
                         width: 690,

@@ -4,7 +4,7 @@ const {
 	SubCategory, Category,
 	TypeAd, User, Booking,
 	Favorite, ImageAd, CharacteristicObject,
-	AdCharacteristicInput, PreviewImageAd
+	AdCharacteristicInput, PreviewImageAd, CommercialImageAd
 } = require('../models')
 const {Op, literal} = require("sequelize");
 const {decryptArrayWithKey} = require("../utils");
@@ -116,7 +116,7 @@ class BoardController {
 							}],
 						}]
 					}],
-					limit: 15,
+					limit: 10,
 					offset: blockOffset
 				})
 				filterAds.map(objects => {
@@ -153,10 +153,9 @@ class BoardController {
 						required: false
 					}],
 					order: [['createdAt', 'DESC']],
-					limit: 15,
+					limit: 10,
 					offset: blockOffset
 				})
-				console.log(ads.length)
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
@@ -178,18 +177,15 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: PreviewImageAd,
+						model: CommercialImageAd,
 						required: false
 					}],
-					limit: 2,
+					limit: 1,
 					offset: vipOffset
 				})
 				let adsCommercialLimit = 4
-				if (adsVip.length < 2)
-					if (adsVip.length === 0)
-						adsCommercialLimit += 2
-					else
-						adsCommercialLimit += 1
+				if (adsVip.length === 1)
+					adsCommercialLimit = 2;
 				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
@@ -211,7 +207,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: PreviewImageAd,
+						model: CommercialImageAd,
 						required: false
 					}],
 					limit: adsCommercialLimit,
@@ -450,7 +446,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: PreviewImageAd,
+						model: CommercialImageAd,
 						required: false
 					}],
 					limit: 1,
@@ -476,7 +472,7 @@ class BoardController {
 						where: {userId},
 						required: false
 					}, {
-						model: PreviewImageAd,
+						model: CommercialImageAd,
 						required: false
 					}],
 					limit: 2,

@@ -8,7 +8,8 @@ const {
 	AdCharacteristicInput, AdCharacteristicSelect, User,
 	Rating, StatusAd, Objects,
 	Characteristic, CharacteristicValue, PreviewImageAd,
-	CharacteristicObject, TypeCharacteristic, SubCategory, Category
+	CharacteristicObject, TypeCharacteristic, SubCategory,
+	Category, CommercialImageAd
 } = require('../models');
 const {Op} = require("sequelize");
 const {resizeImage} = require("../utils");
@@ -16,7 +17,6 @@ const {resizeImage} = require("../utils");
 class AdController {
 
 	async createAd(req, res, next) {
-
 		try {
 			const {
 				title, price, description, address, longevity, showPhone,
@@ -26,6 +26,7 @@ class AdController {
 
 			const {images} = req.files
 			const {previewImage} = req.files
+			const {commercialImage} = req.files
 
 			const userId = req.user
 
@@ -108,6 +109,12 @@ class AdController {
 					await Booking.create({
 						userId, typeAdId, adId: ad.id, dateStart: bookingDateStart, dateEnd: bookingDateEnd, cost, position
 					})
+
+					let previewName = typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vp/' : 'premium/';
+					let cardType = typeAdId === 2 ? 'stPl' : typeAdId === 3 ? 'vp' : 'premium';
+					previewName = previewName + uuid.v4() + '.webp';
+					await resizeImage(commercialImage.data, previewName, cardType)
+					await CommercialImageAd.create({adId: ad.id, name: previewName})
 				}
 			} else {
 				// Создаем объявление без брони
@@ -157,24 +164,24 @@ class AdController {
 				})
 			}
 
-			let previewName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
-			let cardType = typeAdId === 1 ? 'st' : typeAdId === 2 ? 'stPl' : typeAdId === 3 ? 'vip' : 'premium'
-			await resizeImage(previewImage.data, previewName, cardType)
+			let previewName = 'st/pv/' + uuid.v4() + '.webp'
+			await resizeImage(previewImage.data, previewName, 'st')
 			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
-				let fileName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
+				let fileName = 'st/' + uuid.v4() + '.webp'
 				await resizeImage(images.data, fileName, 'st')
 				await ImageAd.create({adId: ad.id, name: fileName})
 			} else {
 				images.map(async (image) => {
-					let fileName = typeAdId === 1 ? 'st/' : typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vip/' : 'premium/' + uuid.v4() + '.webp'
+					let fileName = 'st/' + uuid.v4() + '.webp'
 					await resizeImage(image.data, fileName, 'st')
 					await ImageAd.create({adId: ad.id, name: fileName})
 				})
 			}
 			return res.json({ad});
 		} catch (e) {
+			console.log(e)
 			return next(ApiError.badRequest("Ошибка обработки со стороны сервера"))
 		}
 	}
@@ -560,6 +567,10 @@ class AdController {
 					model: PreviewImageAd,
 					attributes: ['name'],
 					required: false
+				}, {
+					model: CommercialImageAd,
+					attributes: ['name'],
+					required: false
 				}]
 			})
 			if (ad === null) {
@@ -591,6 +602,7 @@ class AdController {
 			} = req.body
 			const {images} = req.files
 			const {previewImage} = req.files
+			const typeAdId = ad.dataValues.typeAdId
 
 			await Ad.update(
 				{ title, description, price }, {
@@ -655,7 +667,6 @@ class AdController {
 					}
 				});
 			})
-
 
 			const previewImagesDB = await PreviewImageAd.findAll({
 				where: {adId: id},

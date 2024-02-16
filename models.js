@@ -45,6 +45,11 @@ const PreviewImageAd = sequelize.define('previewImageAd', {
   name: {type: DataTypes.STRING}
 })
 
+const CommercialImageAd = sequelize.define('commercialImageAd', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  name: {type: DataTypes.STRING}
+})
+
 const UserAvatar = sequelize.define('userAvatar', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   name: {type: DataTypes.STRING}
@@ -217,6 +222,9 @@ ImageAd.belongsTo(Ad)
 
 Ad.hasMany(PreviewImageAd)
 PreviewImageAd.belongsTo(Ad)
+
+Ad.hasMany(CommercialImageAd)
+CommercialImageAd.belongsTo(Ad)
 //Бронирование типов объявления
 Ad.hasMany(Booking)
 Booking.belongsTo(Ad)
@@ -346,6 +354,5 @@ module.exports = {
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd, StaticAd,
   Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets, TopicOfAppeal,
-  StatusOfAppeal, Appeal, ResponseSupport, Message
+  StatusOfAppeal, Appeal, ResponseSupport, Message, CommercialImageAd
 }
-
