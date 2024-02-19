@@ -152,12 +152,10 @@ const PositionCity = sequelize.define('positionCity', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   latitude: {type: DataTypes.FLOAT, allowNull: true},
   longitude: {type: DataTypes.FLOAT, allowNull: true},
-  name: {type: DataTypes.STRING, allowNull: false}
+  name: {type: DataTypes.STRING, allowNull: false},
+  citySlug: {type: DataTypes.STRING, allowNull: false}
 })
-const PositionStreets = sequelize.define('positionStreets', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  name: {type: DataTypes.STRING, allowNull: false}
-})
+
 const StaticAd = sequelize.define('staticAd', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
   dateStart: {type: DataTypes.DATE, allowNull: false},
@@ -329,9 +327,6 @@ PositionRegion.belongsTo(PositionDistrict)
 PositionRegion.hasMany(PositionCity)
 PositionCity.belongsTo(PositionRegion)
 
-PositionCity.hasMany(PositionStreets)
-PositionStreets.belongsTo(PositionCity)
-
 //Поддержка
 User.hasMany(Appeal)
 Appeal.belongsTo(User)
@@ -353,6 +348,6 @@ module.exports = {
   CharacteristicSubCategory, CharacteristicObject, Characteristic, UserAvatar,
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd, StaticAd,
-  Booking, PositionCity, PositionRegion, PositionDistrict, PositionStreets, TopicOfAppeal,
+  Booking, PositionCity, PositionRegion, PositionDistrict, TopicOfAppeal,
   StatusOfAppeal, Appeal, ResponseSupport, Message, CommercialImageAd
 }

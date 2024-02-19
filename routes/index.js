@@ -24,6 +24,7 @@ router.use('/board', auth.isAuthorized, boardRouter)
 router.use('/search', searchRouter)
 router.use('/chat', auth.isAuthorized, chatRouter)
 router.use('/other', otherRouter)
+router.use('/geo', geoRouter)
 router.use('/position', positionRouter)
 router.use('/support', supportRouter)
 

@@ -24,6 +24,7 @@ class BoardController {
 			currentDate.setHours(0, 0, 0, 0)
 			allAds = await Ad.findAll()
 			bookings = await Booking.findAll()
+			console.log('Position', req.position)
 
 			//Перебор всех объявлений
 			for (const ad of allAds) {
@@ -93,7 +94,7 @@ class BoardController {
 						include: [{
 							model: Ad,
 							where: {
-								[Op.or]: [{statusAdId: 1}, {statusAdId: 2}],
+								statusAdId: 2,
 								price: {[Op.between]: price}
 							},
 							include: [{
@@ -130,7 +131,7 @@ class BoardController {
 			if (!subCategoryId && !objectId) {
 				ads = await Ad.findAll({
 					where: {
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}],
+						statusAdId: 2,
 						typeAdId: 1
 					},
 					include: [{
@@ -159,7 +160,7 @@ class BoardController {
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
+						statusAdId: 2
 					},
 					include: [{
 						model: Objects,
@@ -189,7 +190,7 @@ class BoardController {
 				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
+						statusAdId: 2
 					},
 					include: [{
 						model: Objects,
@@ -230,7 +231,7 @@ class BoardController {
 				ads = await Ad.findAll({
 					where: [
 						{id: {[Op.notIn]: ignoreIds}},
-						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+						{statusAdId: 2}
 					],
 					include: includeArray,
 					order: literal('rand()'),
@@ -249,7 +250,7 @@ class BoardController {
 						{objectId: objectId},
 						{id: {[Op.notIn]: ignoreIds}},
 						{typeAdId: 1},
-						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+						{statusAdId: 2}
 					],
 					include: [
 						{
@@ -364,7 +365,7 @@ class BoardController {
 						include: [{
 							model: Ad,
 							where: {
-								[Op.or]: [{statusAdId: 1}, {statusAdId: 2}],
+								statusAdId: 2,
 								price: {[Op.between]: price}
 							},
 							include: [{
@@ -401,7 +402,7 @@ class BoardController {
 			if (!subCategoryId && !objectId) {
 				ads = await Ad.findAll({
 					where: {
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}],
+						statusAdId: 2,
 						typeAdId: 1
 					},
 					include: [{
@@ -429,7 +430,7 @@ class BoardController {
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
+						statusAdId: 2
 					},
 					include: [{
 						model: Objects,
@@ -455,7 +456,7 @@ class BoardController {
 				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
-						[Op.or]: [{statusAdId: 2}, {statusAdId: 3}]
+						statusAdId: 2
 					},
 					include: [{
 						model: Objects,
@@ -495,7 +496,7 @@ class BoardController {
 				ads = await Ad.findAll({
 					where: [
 						{id: {[Op.notIn]: ignoreIds}},
-						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+						{statusAdId: 2}
 					],
 					include: includeArray,
 					order: literal('rand()'),
@@ -514,7 +515,7 @@ class BoardController {
 						{objectId: objectId},
 						{id: {[Op.notIn]: ignoreIds}},
 						{typeAdId: 1},
-						{[Op.or]: [{statusAdId: 1}, {statusAdId: 2}]}
+						{statusAdId: 2}
 					],
 					include: [
 						{
@@ -554,7 +555,7 @@ class BoardController {
 				where: [{isActive: true}],
 				include: {
 					model: Ad,
-					where: [{statusAdId: 2}, {typeAdId: 4}],
+					where: {statusAdId: 2},
 					include: [{
 						model: Objects,
 						include: [{
