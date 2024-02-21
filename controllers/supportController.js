@@ -1,13 +1,13 @@
 const ApiError = require("../error/ApiError");
-const {TopicOfAppeal, StatusOfAppeal, Appeal, Message, ResponseSupport} = require("../models");
+const {
+  TopicOfAppeal, StatusOfAppeal, Appeal, Message
+} = require("../models");
 
 class SupportController {
   async createTopicAppeals(req, res, next) {
     try {
       const {name} = req.body
-      const topic = await TopicOfAppeal.create({
-       name
-      })
+      const topic = await TopicOfAppeal.create({ name })
       return res.json(topic)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
@@ -28,12 +28,31 @@ class SupportController {
 
   async createAppeal(req, res, next) {
     try {
-      const {topicOfAppealId, statusOfAppealId, userId} = req.body
+      const {topicOfAppealId, userId, text} = req.body
       const appeal = await Appeal.create({
         topicOfAppealId,
-        statusOfAppealId,
+        statusOfAppealId: 1,
         userId
       })
+      await Message.create({
+        appealId: appeal.dataValues.id,
+        text,
+        messageId: null,
+        isSupport: false
+      })
+      return res.json(appeal)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
+  async closeAppeal(req, res, next) {
+    try {
+      const {appealId} = req.body
+      const appeal = await Appeal.update(
+        {statusOfAppealId: 2},
+        {where: {id: appealId}}
+      )
       return res.json(appeal)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
@@ -42,10 +61,12 @@ class SupportController {
 
   async createMessage(req, res, next) {
     try {
-      const {appealId, text} = req.body
+      const {appealId, text, messageId = null, isSupport = false} = req.body
       const message = await Message.create({
         appealId,
-        text
+        text,
+        messageId,
+        isSupport
       })
       return res.json(message)
     } catch (e) {
@@ -53,23 +74,35 @@ class SupportController {
     }
   }
 
-  async createResponseSupport(req, res, next) {
+  async getAllAppeal(req, res, next) {
     try {
-      const {appealId, text} = req.body
-      const response = await ResponseSupport.create({
-        appealId,
-        text
+      const {statusOfAppealId} = req.query
+      let appeal = await Appeal.findAll({
+        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
       })
-      return res.json(response)
+
+      if (statusOfAppealId) {
+        appeal = await Appeal.findAll({
+          where: {statusOfAppealId},
+          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
+        })
+      }
+
+
+      return res.json(appeal)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }
   }
 
-  async getAllAppeal(req, res, next) {
+  async getMessagesOfAppeal(req, res, next) {
     try {
-      const appeal = await Appeal.findAll()
-      return res.json(appeal)
+      const {id} = req.query
+      const messages = await Message.findAll({
+        where: {appealId: id},
+        include: [{model: Appeal, include: {model: TopicOfAppeal}}, {model: Message, required: false}]
+      })
+      return res.json(messages)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
     }

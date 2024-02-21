@@ -8,9 +8,11 @@ router.post('/createTopicAppeals', supportController.createTopicAppeals)
 router.post('/createStatusAppeals', supportController.createStatusAppeals)
 router.post('/createAppeal', supportController.createAppeal)
 router.post('/createMessage', supportController.createMessage)
-router.post('/createResponseSupport', supportController.createResponseSupport)
+
+router.put('/closeAppeal', supportController.closeAppeal)
 
 router.get('/getAllAppeal', supportController.getAllAppeal)
+router.get('/getMessagesOfAppeal', supportController.getMessagesOfAppeal)
 router.get('/getTopicAppeals', supportController.getTopicAppeals)
 
-module.exports = router
+module.exports  = router

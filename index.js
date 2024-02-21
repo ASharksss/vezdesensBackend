@@ -15,7 +15,7 @@ const originAccess = process.env.originAccess || '["https://vezdesens.ru"]'
 
 const app = express()
 app.use(cors({ credentials: true, origin: JSON.parse(originAccess),
-	allowedHeaders: ['Content-Type', 'Authorization', 'Position'], methods: ['GET', 'POST', 'OPTIONS', 'DELETE']}))
+	allowedHeaders: ['Content-Type', 'Authorization', 'x-position'], methods: ['GET', 'POST', 'OPTIONS', 'DELETE']}))
 app.use(express.json())
 app.use(cookieParser());
 app.use('/static', express.static(path.resolve(__dirname, 'static')))

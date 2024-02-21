@@ -180,14 +180,10 @@ const Appeal = sequelize.define('appeal', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
-const ResponseSupport = sequelize.define('responseSupport', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  text: {type: DataTypes.STRING}
-})
-
 const Message = sequelize.define('message', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  text: {type: DataTypes.STRING}
+  text: {type: DataTypes.STRING},
+  isSupport: {type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false}
 })
 
 
@@ -340,8 +336,8 @@ Appeal.belongsTo(StatusOfAppeal)
 Appeal.hasMany(Message)
 Message.belongsTo(Appeal)
 
-Message.hasMany(ResponseSupport)
-ResponseSupport.belongsTo(Message)
+Message.hasMany(Message, { as: 'Children', foreignKey: 'parentId' });
+Message.belongsTo(Message, { as: 'Parent', foreignKey: 'parentId' });
 
 module.exports = {
   Rating, TypeCharacteristic, AdCharacteristicInput, AdCharacteristicSelect,
@@ -349,5 +345,5 @@ module.exports = {
   CharacteristicValue, Favorite, AdView, Ad, TypeAd, StatusAd, Objects,
   Role, Category, SubCategory, User, Chat, ImageAd, PreviewImageAd, StaticAd,
   Booking, PositionCity, PositionRegion, PositionDistrict, TopicOfAppeal,
-  StatusOfAppeal, Appeal, ResponseSupport, Message, CommercialImageAd
+  StatusOfAppeal, Appeal, Message, CommercialImageAd
 }
