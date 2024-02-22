@@ -33,6 +33,7 @@ class UserController {
 				attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone'],
 				include: {
 					model: UserAvatar,
+					as: 'userAvatars',
 					attributes: ['name'],
 					required: false
 				},
@@ -99,6 +100,7 @@ class UserController {
 					where: {login},
 					include: {
 						model: UserAvatar,
+						as: 'userAvatars',
 						attributes: ['name'],
 						required: false
 					},
