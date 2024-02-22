@@ -23,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     value: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'adViews',
     modelName: 'AdView',
+    name: {
+      singular: 'adView',
+      plural: 'adViews'
+    }
   });
   return AdView;
 };

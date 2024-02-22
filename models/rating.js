@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Rating.belongsTo(models.User, {
-        as: 'user',
         foreignKey: 'customerId'
       })
       Rating.belongsTo(models.User, {
-        as: 'ratings',
         foreignKey: 'sellerId'
       })
       // define association here
@@ -26,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     text: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'ratings',
     modelName: 'Rating',
+    name: {
+      singular: 'rating',
+      plural: 'ratings'
+    }
   });
   return Rating;
 };

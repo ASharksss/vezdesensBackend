@@ -11,27 +11,21 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Characteristic.hasMany(models.CharacteristicValue, {
-        as: 'characteristicValue',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.CharacteristicObject, {
-        as: 'characteristicObject',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.CharacteristicSubCategory, {
-        as: 'characteristicSubCategory',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.AdCharacteristicSelect, {
-        as: 'adCharacteristicSelect',
         foreignKey: 'characteristicId'
       })
       Characteristic.belongsTo(models.TypeCharacteristic, {
-        as: 'typeCharacteristic',
         foreignKey: 'typeCharacteristicId'
       })
-      Characteristic.belongsTo(models.AdCharacteristicInput, {
-        as: 'adCharacteristicInput',
+      Characteristic.hasMany(models.AdCharacteristicInput, {
         foreignKey: 'characteristicId'
       })
     }
@@ -41,7 +35,12 @@ module.exports = (sequelize, DataTypes) => {
     required: DataTypes.BOOLEAN
   }, {
     sequelize,
+    tableName: 'characteristics',
     modelName: 'Characteristic',
+    name: {
+      singular: 'characteristic',
+      plural: 'characteristics'
+    }
   });
   return Characteristic;
 };

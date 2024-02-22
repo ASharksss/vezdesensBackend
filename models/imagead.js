@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       ImageAd.belongsTo(models.Ad, {
-        as: 'ad',
         foreignKey: 'adId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'imageAds',
     modelName: 'ImageAd',
+    name: {
+      singular: 'imageAd',
+      plural: 'imageAds'
+    }
   });
   return ImageAd;
 };

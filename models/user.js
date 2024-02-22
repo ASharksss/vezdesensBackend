@@ -11,34 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       User.hasMany(models.Ad, {
-        as: 'ads',
         foreignKey: 'userId'
       })
       User.hasMany(models.Booking, {
         foreignKey: 'userId'
       })
       User.hasMany(models.AdView, {
-        as: 'adViews',
         foreignKey: 'userId'
       })
       User.hasMany(models.Favorite, {
-        as: 'favorites',
         foreignKey: 'userId'
       })
       User.hasMany(models.Rating, {
-        as: 'user',
         foreignKey: 'customerId'
       })
       User.hasMany(models.Rating, {
-        as: 'ratings',
         foreignKey: 'sellerId'
       })
       User.hasMany(models.UserAvatar, {
-        as: 'userAvatars',
         foreignKey: 'userId'
       })
       User.hasMany(models.Appeal, {
-        as: 'appeals',
         foreignKey: 'userId'
       })
       // define association here
@@ -52,7 +45,12 @@ module.exports = (sequelize, DataTypes) => {
     login: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'users',
     modelName: 'User',
+    name: {
+      singular: 'user',
+      plural: 'users'
+    }
   });
   return User;
 };

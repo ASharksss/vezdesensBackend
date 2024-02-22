@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       TypeCharacteristic.hasMany(models.Characteristic, {
-        as: 'characteristically',
         foreignKey: 'typeCharacteristicId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'typeCharacteristics',
     modelName: 'TypeCharacteristic',
+    name: {
+      singular: 'typeCharacteristic',
+      plural: 'typeCharacteristics'
+    }
   });
   return TypeCharacteristic;
 };

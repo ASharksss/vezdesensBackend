@@ -33,7 +33,6 @@ class UserController {
 				attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone'],
 				include: {
 					model: UserAvatar,
-					as: 'userAvatars',
 					attributes: ['name'],
 					required: false
 				},
@@ -100,7 +99,6 @@ class UserController {
 					where: {login},
 					include: {
 						model: UserAvatar,
-						as: 'userAvatars',
 						attributes: ['name'],
 						required: false
 					},
@@ -157,11 +155,9 @@ class UserController {
 				attributes: ['id', 'createdAt', 'grade', 'text'],
 				include: [{
 					model: User,
-					as: 'user',
 					attributes: ['id', 'login', 'name'],
 					include: {
 						model: UserAvatar,
-						as: 'userAvatars',
 						attributes: ['name']
 					}
 				}]
@@ -180,42 +176,32 @@ class UserController {
 				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone'],
 				include: [{
 					model: UserAvatar,
-					as: 'userAvatars',
 					attributes: ['name'],
 					required: false
 				}, {
 					model: Ad,
-					as: 'ads',
 					include: [
 						{
 							model: TypeAd,
-							as: 'typeAd'
 						}, {
 							model: StatusAd,
-							as: 'statusAd'
 						}, {
 							model: Objects,
-							as: 'object'
 						}, {
 							model: PreviewImageAd,
-							as: 'previewImageAds',
 							required: false
 						}, {
 							model: Favorite,
-							as: 'favorites',
 							attributes: ['id']
 						}, {
 							model: ImageAd,
-							as: 'imageAds',
 							required: false
 						}]
 				}, {
 					model: Rating,
-					as: 'ratings',
 					attributes: ['id', 'text', 'grade', 'createdAt'],
 					include: {
 						model: User,
-						as: 'user',
 						attributes: ['id', 'name']
 					}
 				}]
@@ -250,7 +236,6 @@ class UserController {
 	async getFavorite(req, res, next) {
 		try {
 			const userId = req.user
-			console.log(userId)
 			if (userId === null || userId === undefined) {
 				return res.json(ApiError.forbidden('Ошибка токена'))
 			}

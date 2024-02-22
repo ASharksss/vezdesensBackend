@@ -11,15 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Objects.hasMany(models.Ad, {
-        as: 'ads',
         foreignKey: 'objectId'
       })
       Objects.hasMany(models.CharacteristicObject, {
-        as: 'characteristicObject',
         foreignKey: 'objectId'
       })
       Objects.belongsTo(models.SubCategory, {
-        as: 'subCategory',
         foreignKey: 'subCategoryId'
       })
       // define association here
@@ -29,7 +26,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'objects',
     modelName: 'Objects',
+    name: {
+      singular: 'object',
+      plural: 'objects'
+    }
   });
   return Objects;
 };

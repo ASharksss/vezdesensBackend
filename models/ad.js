@@ -11,35 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Ad.belongsTo(models.User, {
-        as: 'user',
         foreignKey: 'userId'
       })
       Ad.belongsTo(models.TypeAd, {
-        as: 'typeAd',
         foreignKey: 'typeAdId'
       })
       Ad.belongsTo(models.StatusAd, {
-        as: 'statusAd',
         foreignKey: 'statusAdId'
       })
       Ad.belongsTo(models.Objects, {
-        as: 'object',
         foreignKey: 'objectId'
       })
       Ad.hasMany(models.ImageAd, {
-        as: 'imageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.PreviewImageAd, {
-        as: 'previewImageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.AdCharacteristicInput, {
-        as: 'adCharacteristicInputs',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.CommercialImageAd, {
-        as: 'commercialImageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.Booking, {
@@ -49,11 +41,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'adId'
       })
       Ad.hasMany(models.Favorite, {
-        as: 'favorites',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.AdCharacteristicSelect, {
-        as: 'adCharacteristicSelects',
         foreignKey: 'adId'
       })
       // define association here
@@ -69,7 +59,12 @@ module.exports = (sequelize, DataTypes) => {
     dateEndActive: DataTypes.DATE
   }, {
     sequelize,
+    tableName: 'ads',
     modelName: 'Ad',
+    name: {
+      singular: 'ad',
+      plural: 'ads'
+    }
   });
   return Ad;
 };

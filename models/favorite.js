@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Favorite.belongsTo(models.Ad, {
-        as: 'ad',
         foreignKey: 'adId'
       })
       Favorite.belongsTo(models.User, {
-        as: 'user',
         foreignKey: 'userId'
       })
       // define association here
@@ -25,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     value: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'favorites',
     modelName: 'Favorite',
+    name: {
+      singular: 'favorite',
+      plural: 'favorites'
+    }
   });
   return Favorite;
 };

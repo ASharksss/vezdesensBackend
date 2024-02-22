@@ -56,11 +56,9 @@ class SearchController {
             }
             let selectInclude = {
                 model: AdCharacteristicSelect,
-                as: 'adCharacteristicSelects',
                 attributes: []
             }, inputsInclude = {
                 model: AdCharacteristicInput,
-                as: 'adCharacteristicInputs',
                 attributes: []
             }
             if (selectsArray.length > 0) {
@@ -75,17 +73,14 @@ class SearchController {
                     where: {id: subCategory},
                     include: [{
                         model: Category,
-                        as: 'category',
                         attributes: ['id', 'name'],
                         where: {id: category}
                     }, {
                         model: Objects,
-                        as: 'objects',
                         attributes: ['id', 'name'],
                         where: {id: object},
                         include: {
                             model: Ad,
-                            as: 'ads',
                             where: {
                                 price: {[Op.between]: price},
                                 statusAdId: {[Op.or]: [2, 4]}
@@ -93,11 +88,9 @@ class SearchController {
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {
                                 model: PreviewImageAd,
-                                as: 'previewImageAds',
                                 attributes: ['name']
                             }, {
                                 model: Favorite,
-                                as: 'favorites',
                                 where: {userId},
                                 required: false
                             }]
@@ -112,16 +105,13 @@ class SearchController {
                     where: {id: subCategory},
                     include: [{
                         model: Category,
-                        as: 'category',
                         attributes: ['id', 'name'],
                         where: {id: category}
                     }, {
                         model: Objects,
-                        as: 'objects',
                         attributes: ['id', 'name'],
                         include: {
                             model: Ad,
-                            as: 'ads',
                             where: {
                                 price: {[Op.between]: price},
                                 statusAdId: {[Op.or]: [2, 4]}
@@ -129,11 +119,9 @@ class SearchController {
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {
                                 model: PreviewImageAd,
-                                as: 'previewImageAds',
                                 attributes: ['name']
                             }, {
                                 model: Favorite,
-                                as: 'favorites',
                                 where: {userId: userId !== undefined ? userId : null},
                                 required: false
                             }]

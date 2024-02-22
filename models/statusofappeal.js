@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       StatusOfAppeal.hasMany(models.Appeal, {
-        as: 'appeal',
         foreignKey: 'statusOfAppealId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'statusOfAppeals',
     modelName: 'StatusOfAppeal',
+    name: {
+      singular: 'statusOfAppeal',
+      plural: 'statusOfAppeals'
+    }
   });
   return StatusOfAppeal;
 };

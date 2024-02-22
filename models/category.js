@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Category.hasMany(models.SubCategory, {
-        as: 'subCategories',
         foreignKey: 'categoryId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'categories',
     modelName: 'Category',
+    name: {
+      singular: 'category',
+      plural: 'categories'
+    }
   });
   return Category;
 };

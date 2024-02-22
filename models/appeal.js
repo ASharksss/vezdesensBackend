@@ -11,19 +11,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Appeal.belongsTo(models.User, {
-        as: 'user',
         foreignKey: 'userId'
       })
       Appeal.belongsTo(models.TopicOfAppeal, {
-        as: 'topicOfAppeals',
         foreignKey: 'topicOfAppealId'
       })
       Appeal.belongsTo(models.StatusOfAppeal, {
-        as: 'statusOfAppeals',
         foreignKey: 'statusOfAppealId'
       })
       Appeal.hasMany(models.Message, {
-        as: 'message',
         foreignKey: 'appealId'
       })
       // define association here
@@ -33,7 +29,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'appeals',
     modelName: 'Appeal',
+    name: {
+      singular: 'appeal',
+      plural: 'appeals'
+    }
   });
   return Appeal;
 };

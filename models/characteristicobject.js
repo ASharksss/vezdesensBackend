@@ -10,12 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      CharacteristicObject.hasMany(models.Characteristic, {
-        as: 'characteristic',
+      CharacteristicObject.belongsTo(models.Characteristic, {
         foreignKey: 'characteristicId'
       })
       CharacteristicObject.belongsTo(models.Objects, {
-        as: 'object',
         foreignKey: 'objectId'
       })
       // define association here
@@ -25,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'characteristicObjects',
     modelName: 'CharacteristicObject',
+    name: {
+      singular: 'characteristicObjects',
+      plural: 'characteristicObject'
+    }
   });
   return CharacteristicObject;
 };

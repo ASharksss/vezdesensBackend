@@ -47,26 +47,20 @@ class BoardController {
 			const includeArray = [
 				{
 					model: Objects,
-					as: 'object',
 					where: [ { subCategoryId: subCategoryId } ],
 					include: [ {
 							model: SubCategory,
-							as: 'subCategory',
 							include: {
 								Category,
-								as: 'category'
 							}
 						}]
 				}, {
 					model: TypeAd,
-					as: 'typeAd'
 				}, {
 					model: User,
-					as: 'user',
 					attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 				}, {
 					model: PreviewImageAd,
-					as: 'previewImageAds',
 					required: false
 				}
 			]
@@ -74,7 +68,6 @@ class BoardController {
 			if (userId !== null) {
 				includeArray.push({
 					model: Favorite,
-					as: 'favorites',
 					where: { userId },
 					required: false
 				})
@@ -147,19 +140,15 @@ class BoardController {
 					},
 					include: [{
 						model: TypeAd,
-						as: 'typeAd'
 					}, {
 						model: User,
-						as: 'user',
 						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
-						as: 'favorites',
 						where: {userId},
 						required: false
 					}, {
 						model: PreviewImageAd,
-						as: 'previewImageAds',
 						required: false
 					}],
 					order: [['createdAt', 'DESC']],
@@ -173,19 +162,15 @@ class BoardController {
 					},
 					include: [{
 						model: TypeAd,
-						as: 'typeAd'
 					}, {
 						model: User,
-						as: 'user',
 						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
-						as: 'favorites',
 						where: {userId},
 						required: false
 					}, {
 						model: CommercialImageAd,
-						as: 'commercialImageAds',
 						required: false
 					}],
 					limit: 1,
@@ -201,19 +186,15 @@ class BoardController {
 					},
 					include: [{
 						model: TypeAd,
-						as: 'typeAd'
 					}, {
 						model: User,
-						as: 'user',
 						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
 					}, {
 						model: Favorite,
-						as: 'favorites',
 						where: {userId},
 						required: false
 					}, {
 						model: CommercialImageAd,
-						as: 'commercialImageAds',
 						required: false
 					}],
 					limit: adsCommercialLimit,
@@ -562,12 +543,6 @@ class BoardController {
 					model: Ad,
 					where: {statusAdId: 2},
 					include: [{
-						model: Objects,
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					}, {
 						model: TypeAd
 					}, {
 						model: User,

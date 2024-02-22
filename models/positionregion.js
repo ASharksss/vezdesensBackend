@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       PositionRegion.belongsTo(models.PositionDistrict, {
-        as: 'districts',
         foreignKey: 'positionDistrictId'
       })
       PositionRegion.hasMany(models.PositionCity, {
-        as: 'cities',
         foreignKey: 'positionRegionId'
       })
       // define association here
@@ -25,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'positionRegions',
     modelName: 'PositionRegion',
+    name: {
+      singular: 'positionRegion',
+      plural: 'positionRegions'
+    }
   });
   return PositionRegion;
 };

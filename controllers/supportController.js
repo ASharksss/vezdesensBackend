@@ -62,6 +62,10 @@ class SupportController {
   async createMessage(req, res, next) {
     try {
       const {appealId, text, messageId = null, isSupport = false} = req.body
+      await Appeal.update(
+        {statusOfAppealId: 1},
+        {where: {id: appealId}}
+      )
       const message = await Message.create({
         appealId,
         text,
@@ -78,13 +82,13 @@ class SupportController {
     try {
       const {statusOfAppealId} = req.query
       let appeal = await Appeal.findAll({
-        include: [{model: StatusOfAppeal, as: 'statusOfAppeals'}, {model: TopicOfAppeal, as: 'topicOfAppeals'}]
+        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
       })
 
       if (statusOfAppealId) {
         appeal = await Appeal.findAll({
           where: {statusOfAppealId},
-          include: [{model: StatusOfAppeal, as: 'statusOfAppeals'}, {model: TopicOfAppeal, as: 'topicOfAppeals'}]
+          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
         })
       }
 
@@ -100,11 +104,10 @@ class SupportController {
       const {id} = req.query
       const messages = await Message.findAll({
         where: {appealId: id},
-        include: [{model: Appeal, as: 'appeal',
-          include: [{model: TopicOfAppeal, as: 'topicOfAppeals'}, {model: User, as: 'user', required: false, attributes: ['name']}]
+        include: [{model: Appeal,
+          include: [{model: TopicOfAppeal}, {model: User, required: false, attributes: ['name']}]
         }, {
           model: Message,
-          as: 'children',
           required: false
         }]
       })

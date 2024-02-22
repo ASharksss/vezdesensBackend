@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       CharacteristicSubCategory.hasMany(models.Characteristic, {
-        as: 'characteristic',
         foreignKey: 'characteristicId'
       })
       CharacteristicSubCategory.hasMany(models.SubCategory, {
-        as: 'subCategory',
         foreignKey: 'subCategoryId'
       })
       // define association here
@@ -25,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'characteristicSubCategories',
     modelName: 'CharacteristicSubCategory',
+    name: {
+      singular: 'characteristicSubCategory',
+      plural: 'characteristicSubCategories'
+    }
   });
   return CharacteristicSubCategory;
 };

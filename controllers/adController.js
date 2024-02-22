@@ -193,118 +193,60 @@ class AdController {
 
 			let view, ad
 
-			if (userId !== null) {
-				//Достаем объявление
-				ad = await Ad.findOne({
-					where: [{id: adId}],
+			ad = await Ad.findOne({
+				where: [{id: adId}],
+				include: [{
+					model: Objects,
+					attributes: ['id', 'name'],
 					include: [{
-						model: Objects,
+						model: SubCategory,
 						attributes: ['id', 'name'],
 						include: [{
-							model: SubCategory,
-							attributes: ['id', 'name'],
-							include: [{
-								model: Category,
-								attributes: ['id', 'name']
-							}]
+							model: Category,
+							attributes: ['id', 'name']
 						}]
-					}, {
-						model: AdCharacteristicInput,
-						attributes: ['id', 'value'],
-						required: false,
-						include: {
-							model: Characteristic,
-							attributes: ['name', 'required']
-						}
-					}, {
-						model: AdCharacteristicSelect,
-						attributes: ['id'],
-						required: false,
-						include: [{
-							model: Characteristic,
-							attributes: ['name', 'required']
-						}, {
-							model: CharacteristicValue,
-							attributes: ['name']
-						}]
-					}, {
-						model: AdView
-					}, {
-						model: Favorite,
-						where: {userId},
-						required: false
-					}, {
-						model: User,
-						attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt'],
-						include: {
-							model: Rating,
-							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
-							include: {
-								model: User,
-								attributes: ['id', 'login', 'createdAt', 'phone', 'name']
-							}
-						}
-					}, {
-						model: ImageAd,
-						required: false
 					}]
-				})
-			} else {
-				//Достаем объявление
-				ad = await Ad.findOne({
-					where: [{id: adId}],
+				}, {
+					model: AdCharacteristicInput,
+					attributes: ['id', 'value'],
+					required: false,
+					include: {
+						model: Characteristic,
+						attributes: ['name', 'required']
+					}
+				}, {
+					model: AdCharacteristicSelect,
+					attributes: ['id'],
+					required: false,
 					include: [{
-						model: Objects,
-						attributes: ['id', 'name'],
-						include: [{
-							model: SubCategory,
-							attributes: ['id', 'name'],
-							include: [{
-								model: Category,
-								attributes: ['id', 'name']
-							}]
-						}]
+						model: Characteristic,
+						attributes: ['name', 'required']
 					}, {
-						model: AdCharacteristicInput,
-						attributes: ['id', 'value'],
-						required: false,
-						include: {
-							model: Characteristic,
-							attributes: ['name']
-						}
-					}, {
-						model: AdCharacteristicSelect,
-						attributes: ['id'],
-						required: false,
-						include: [{
-							model: Characteristic,
-							attributes: ['name']
-						}, {
-							model: CharacteristicValue,
-							attributes: ['name']
-						}]
-					}, {
-						model: AdView
-					}, {
-						model: Favorite,
-						required: false
-					}, {
-						model: User,
-						attributes: ['id', 'login', 'createdAt', 'phone', 'name'],
-						include: {
-							model: Rating,
-							attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
-							include: {
-								model: User,
-								attributes: ['id', 'login', 'createdAt', 'phone', 'name']
-							}
-						}
-					}, {
-						model: ImageAd,
-						required: false
+						model: CharacteristicValue,
+						attributes: ['name']
 					}]
-				})
-			}
+				}, {
+					model: AdView
+				}, {
+					model: Favorite,
+					where: {userId},
+					required: false
+				}, {
+					model: User,
+					attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt'],
+					include: {
+						model: Rating,
+						attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
+						include: {
+							model: User,
+							attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+						}
+					}
+				}, {
+					model: ImageAd,
+					required: false
+				}]
+			})
 
 			//Получение просмотров по объявлению
 			const viewsOfAd = await AdView.findAndCountAll({

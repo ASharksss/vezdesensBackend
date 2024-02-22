@@ -11,15 +11,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Message.belongsTo(models.Appeal, {
-                as: 'appeal',
                 foreignKey: 'appealId'
             })
             Message.hasMany(models.Message, {
-              as: 'children',
               foreignKey: 'parentId'
             });
             Message.belongsTo(models.Message, {
-              as: 'parent',
               foreignKey: 'parentId'
             });
             // define association here
@@ -31,7 +28,12 @@ module.exports = (sequelize, DataTypes) => {
         isSupport: DataTypes.BOOLEAN
     }, {
         sequelize,
+        tableName: 'messages',
         modelName: 'Message',
+        name: {
+            singular: 'messages',
+            plural: 'message'
+        }
     });
     return Message;
 };

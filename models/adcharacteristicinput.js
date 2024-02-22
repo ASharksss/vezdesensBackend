@@ -11,13 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       AdCharacteristicInput.belongsTo(models.Ad, {
-        as: 'ad',
         foreignKey: 'adId'
       })
       AdCharacteristicInput.belongsTo(models.Characteristic, {
-        as: 'characteristic',
         foreignKey: 'characteristicId'
-      })
+      });
       // define association here
     }
   }
@@ -25,7 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     value: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'adCharacteristicInputs',
     modelName: 'AdCharacteristicInput',
+    name: {
+      singular: 'adCharacteristicInput',
+      plural: 'adCharacteristicInputs'
+    }
   });
   return AdCharacteristicInput;
 };

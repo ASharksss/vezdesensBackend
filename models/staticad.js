@@ -20,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     href: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'staticAds',
     modelName: 'StaticAd',
+    name: {
+      singular: 'staticAd',
+      plural: 'staticAds'
+    }
   });
   return StaticAd;
 };

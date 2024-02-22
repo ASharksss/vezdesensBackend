@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       UserAvatar.belongsTo(models.User, {
-        as: 'users',
         foreignKey: 'userId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'userAvatars',
     modelName: 'UserAvatar',
+    name: {
+      singular: 'userAvatar',
+      plural: 'userAvatars'
+    }
   });
   return UserAvatar;
 };

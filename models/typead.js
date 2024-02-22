@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       TypeAd.hasMany(models.Ad, {
-        as: 'ads',
         foreignKey: 'typeAdId'
       })
       TypeAd.hasMany(models.Booking, {
-        as: 'bookings',
         foreignKey: 'typeAdId'
       })
       // define association here
@@ -27,7 +25,12 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.INTEGER
   }, {
     sequelize,
+    tableName: 'typeAds',
     modelName: 'TypeAd',
+    name: {
+      singular: 'typeAd',
+      plural: 'typeAds'
+    }
   });
   return TypeAd;
 };

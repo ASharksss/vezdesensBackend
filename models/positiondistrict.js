@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       PositionDistrict.hasMany(models.PositionRegion, {
-        as: 'regions',
         foreignKey: 'positionDistrictId'
       })
       // define association here
@@ -21,7 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'positionDistricts',
     modelName: 'PositionDistrict',
+    name: {
+      singular: 'positionDistrict',
+      plural: 'positionDistricts'
+    }
   });
   return PositionDistrict;
 };

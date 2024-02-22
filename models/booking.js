@@ -11,15 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Booking.belongsTo(models.Ad, {
-        as: 'ad',
         foreignKey: 'adId'
       })
       Booking.belongsTo(models.User, {
-        as: 'user',
         foreignKey: 'userId'
       })
       Booking.belongsTo(models.TypeAd, {
-        as: 'typeAd',
         foreignKey: 'typeAdId'
       })
 
@@ -34,7 +31,12 @@ module.exports = (sequelize, DataTypes) => {
     isActive: DataTypes.BOOLEAN
   }, {
     sequelize,
+    tableName: 'bookings',
     modelName: 'Booking',
+    name: {
+      singular: 'booking',
+      plural: 'bookings'
+    }
   });
   return Booking;
 };

@@ -18,7 +18,12 @@ module.exports = (sequelize, DataTypes) => {
     code: DataTypes.STRING
   }, {
     sequelize,
+    tableName: 'rebasePasswords',
     modelName: 'RebasePassword',
+    name: {
+      singular: 'rebasePassword',
+      plural: 'rebasePasswords'
+    }
   });
   return RebasePassword;
 };
