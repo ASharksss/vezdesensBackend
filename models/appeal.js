@@ -15,11 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       })
       Appeal.belongsTo(models.TopicOfAppeal, {
-        as: 'topicOfAppeal',
+        as: 'topicOfAppeals',
         foreignKey: 'topicOfAppealId'
       })
       Appeal.belongsTo(models.StatusOfAppeal, {
-        as: 'statusOfAppeal',
+        as: 'statusOfAppeals',
         foreignKey: 'statusOfAppealId'
       })
       Appeal.hasMany(models.Message, {

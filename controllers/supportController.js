@@ -1,13 +1,13 @@
 const ApiError = require("../error/ApiError");
 const {
-  TopicOfAppeal, StatusOfAppeal, Appeal, Message
+  TopicOfAppeal, StatusOfAppeal, Appeal, Message, User
 } = require("../models");
 
 class SupportController {
   async createTopicAppeals(req, res, next) {
     try {
       const {name} = req.body
-      const topic = await TopicOfAppeal.create({ name })
+      const topic = await TopicOfAppeal.create({name})
       return res.json(topic)
     } catch (e) {
       return next(ApiError.badRequest(e.message))
@@ -37,7 +37,7 @@ class SupportController {
       await Message.create({
         appealId: appeal.dataValues.id,
         text,
-        messageId: null,
+        parentId: null,
         isSupport: false
       })
       return res.json(appeal)
@@ -78,13 +78,13 @@ class SupportController {
     try {
       const {statusOfAppealId} = req.query
       let appeal = await Appeal.findAll({
-        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
+        include: [{model: StatusOfAppeal, as: 'statusOfAppeals'}, {model: TopicOfAppeal, as: 'topicOfAppeals'}]
       })
 
       if (statusOfAppealId) {
         appeal = await Appeal.findAll({
           where: {statusOfAppealId},
-          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
+          include: [{model: StatusOfAppeal, as: 'statusOfAppeals'}, {model: TopicOfAppeal, as: 'topicOfAppeals'}]
         })
       }
 
@@ -100,7 +100,13 @@ class SupportController {
       const {id} = req.query
       const messages = await Message.findAll({
         where: {appealId: id},
-        include: [{model: Appeal, include: {model: TopicOfAppeal}}, {model: Message, required: false}]
+        include: [{model: Appeal, as: 'appeal',
+          include: [{model: TopicOfAppeal, as: 'topicOfAppeals'}, {model: User, as: 'user', required: false, attributes: ['name']}]
+        }, {
+          model: Message,
+          as: 'children',
+          required: false
+        }]
       })
       return res.json(messages)
     } catch (e) {
