@@ -11,19 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Appeal.belongsTo(models.User, {
-        as: 'users',
+        as: 'user',
         foreignKey: 'userId'
       })
       Appeal.belongsTo(models.TopicOfAppeal, {
-        as: 'topics',
+        as: 'topicOfAppeal',
         foreignKey: 'topicOfAppealId'
       })
       Appeal.belongsTo(models.StatusOfAppeal, {
-        as: 'status',
+        as: 'statusOfAppeal',
         foreignKey: 'statusOfAppealId'
       })
       Appeal.hasMany(models.Message, {
-        as: 'messages',
+        as: 'message',
         foreignKey: 'appealId'
       })
       // define association here

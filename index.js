@@ -4,8 +4,8 @@ const express = require('express')
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
 const path = require('path')
-const sequelize = require('./db')
-const models = require('./models')
+const {sequelize} = require('./models')
+const {chatDB} = require('./db')
 const router = require('./routes/index')
 const errorHandler = require('./middleware/ErrorHandingMiddleware')
 const position = require("./middleware/GeoHandingMiddleware");
@@ -33,9 +33,9 @@ app.get('/ping', (req, res) => {
 const start = async () => {
   try {
     await sequelize.authenticate()
-    await sequelize.sync().then(() => console.log('успешно'))
-      .catch((error) => console.error('Error', error))
-    await sequelize.chatDB.authenticate()
+    // await sequelize.sync().then(() => console.log('успешно'))
+    //   .catch((error) => console.error('Error', error))
+    await chatDB.authenticate()
     app.listen(PORT, () => console.log(`Сервер работает на порту ${PORT}`))
   } catch (e) {
     console.log(e)

@@ -11,27 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Characteristic.hasMany(models.CharacteristicValue, {
-        as: 'values',
+        as: 'characteristicValue',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.CharacteristicObject, {
-        as: 'objects',
+        as: 'characteristicObject',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.CharacteristicSubCategory, {
-        as: 'subcategories',
+        as: 'characteristicSubCategory',
         foreignKey: 'characteristicId'
       })
       Characteristic.hasMany(models.AdCharacteristicSelect, {
-        as: 'adCharacteristicSelects',
+        as: 'adCharacteristicSelect',
         foreignKey: 'characteristicId'
       })
       Characteristic.belongsTo(models.TypeCharacteristic, {
-        as: 'types',
+        as: 'typeCharacteristic',
         foreignKey: 'typeCharacteristicId'
       })
       Characteristic.belongsTo(models.AdCharacteristicInput, {
-        as: 'adCharacteristicInputs',
+        as: 'adCharacteristicInput',
         foreignKey: 'characteristicId'
       })
     }

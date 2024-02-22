@@ -11,11 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       AdView.belongsTo(models.Ad, {
-        as: 'ads',
         foreignKey: 'adId'
       })
       AdView.belongsTo(models.User, {
-        as: 'users',
         foreignKey: 'userId'
       })
       // define association here

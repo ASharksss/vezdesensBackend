@@ -27,11 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'objectId'
       })
       Ad.hasMany(models.ImageAd, {
-        as: 'images',
+        as: 'imageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.PreviewImageAd, {
-        as: 'previewImages',
+        as: 'previewImageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.AdCharacteristicInput, {
@@ -39,15 +39,13 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'adId'
       })
       Ad.hasMany(models.CommercialImageAd, {
-        as: 'commercialImages',
+        as: 'commercialImageAds',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.Booking, {
-        as: 'bookings',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.AdView, {
-        as: 'adViews',
         foreignKey: 'adId'
       })
       Ad.hasMany(models.Favorite, {

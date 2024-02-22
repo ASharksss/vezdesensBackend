@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       PreviewImageAd.belongsTo(models.Ad, {
-        as: 'ads',
+        as: 'ad',
         foreignKey: 'adId'
       })
       // define association here

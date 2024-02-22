@@ -1,11 +1,11 @@
 const ApiError = require('../../error/ApiError')
+const db = require('../../models')
 const {
   Characteristic,
   CharacteristicValue,
   CharacteristicObject,
-  Objects,
   CharacteristicSubCategory, TypeCharacteristic, AdCharacteristicInput
-} = require("../../models");
+} = require('../../models');
 
 class CharacteristicController {
 
@@ -112,13 +112,13 @@ class CharacteristicController {
   async getCharacteristicObject(req, res, next) {
     try {
       const {objectId} = req.query
-      const characteristicObject = await CharacteristicObject.findAll({
+      const characteristicObject = await db.CharacteristicObject.findAll({
         where: {objectId},
         attributes: ['characteristicId', 'objectId'],
         include: [{
-          model: Characteristic,
-          include: [{model: CharacteristicValue, attributes: ['id', 'name']}, {
-            model: TypeCharacteristic,
+          model: db.Characteristic,
+          include: [{model: db.CharacteristicValue, attributes: ['id', 'name']}, {
+            model: db.TypeCharacteristic,
             attributes: ['name']
           }],
           attributes: ['name', 'required']

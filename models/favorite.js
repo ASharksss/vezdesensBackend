@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Favorite.belongsTo(models.Ad, {
-        as: 'ads',
+        as: 'ad',
         foreignKey: 'adId'
       })
       Favorite.belongsTo(models.User, {
-        as: 'users',
+        as: 'user',
         foreignKey: 'userId'
       })
       // define association here

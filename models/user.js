@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       })
       User.hasMany(models.Booking, {
-        as: 'bookings',
         foreignKey: 'userId'
       })
       User.hasMany(models.AdView, {
@@ -27,15 +26,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       })
       User.hasMany(models.Rating, {
-        as: 'customerRatings',
+        as: 'user',
         foreignKey: 'customerId'
       })
       User.hasMany(models.Rating, {
-        as: 'sellerRatings',
+        as: 'ratings',
         foreignKey: 'sellerId'
       })
       User.hasMany(models.UserAvatar, {
-        as: 'avatars',
+        as: 'userAvatars',
         foreignKey: 'userId'
       })
       User.hasMany(models.Appeal, {

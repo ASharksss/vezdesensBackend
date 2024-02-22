@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Message.belongsTo(models.Appeal, {
-                as: 'appeals',
+                as: 'appeal',
                 foreignKey: 'appealId'
             })
             Message.hasMany(models.Message, {

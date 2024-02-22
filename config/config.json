@@ -1,0 +1,13 @@
+{
+  "development": {
+    "username": "root",
+    "password": "localPassword",
+    "database": "vezdesens",
+    "host": "192.168.1.115",
+    "dialect": "mysql",
+    "define": {
+      "timestamps": false
+    },
+    "operatorsAliases": false
+  }
+}
