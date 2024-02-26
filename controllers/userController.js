@@ -324,7 +324,29 @@ class UserController {
 					console.log('Email sent: ' + info.response);
 				}
 			});
-			return res.json({message: 'Код пктивации отправлен Вам на почту'})
+			return res.json({message: 'Код aктивации отправлен Вам на почту'})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest('Ошибка обработки сервера'))
+		}
+	}
+
+	async checkCode (req, res, next) {
+		try {
+			const {code} = req.body
+			const rebase = await RebasePassword.findOne({
+				where: {code},
+				raw: true
+			})
+			if (!rebase) throw next(ApiError.forbidden('Неправильный код активации'))
+			const currentDate = new Date()
+			if (new Date(rebase.createdAt).getTime() + 300000 <= currentDate.getTime()) {
+				await RebasePassword.destroy({
+					where: {code}
+				})
+				throw next(ApiError.forbidden('Код активации просрочился'))
+			}
+			return res.json()
 		} catch (e) {
 			console.log(e)
 			return next(ApiError.badRequest('Ошибка обработки сервера'))

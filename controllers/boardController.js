@@ -50,9 +50,7 @@ class BoardController {
 					where: [ { subCategoryId: subCategoryId } ],
 					include: [ {
 							model: SubCategory,
-							include: {
-								Category,
-							}
+							include: Category
 						}]
 				}, {
 					model: TypeAd,
@@ -238,14 +236,7 @@ class BoardController {
 						{typeAdId: 1},
 						{statusAdId: 2}
 					],
-					include: [
-						{
-							model: Objects,
-							include: [{
-								model: SubCategory,
-								include: Category
-							}]
-						}, {
+					include: [{
 							model: TypeAd
 						}, {
 							model: User,
@@ -310,9 +301,12 @@ class BoardController {
 						model: SubCategory,
 						include: Category
 					}]
-				}, {model: TypeAd},
-				{model: User},
-				{
+				}, {
+					model: TypeAd
+				}, {
+					model: User,
+					attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+				}, {
 					model: PreviewImageAd,
 					required: false
 				}
@@ -392,12 +386,6 @@ class BoardController {
 						typeAdId: 1
 					},
 					include: [{
-						model: Objects,
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					}, {
 						model: TypeAd
 					}, {
 						model: User
@@ -419,12 +407,6 @@ class BoardController {
 						statusAdId: 2
 					},
 					include: [{
-						model: Objects,
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					}, {
 						model: TypeAd
 					}, {
 						model: User
@@ -445,12 +427,6 @@ class BoardController {
 						statusAdId: 2
 					},
 					include: [{
-						model: Objects,
-						include: [{
-							model: SubCategory,
-							include: Category
-						}]
-					}, {
 						model: TypeAd
 					}, {
 						model: User

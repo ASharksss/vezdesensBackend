@@ -12,6 +12,7 @@ router.get('/review/:id', userController.getUserReview)
 
 router.post('/login', userController.login)
 router.post('/password/rebase', userController.rebasePassword)
+router.post('/password/code', userController.checkCode)
 router.post('/registration', userController.registration)
 router.post('/review', auth.isAuthorized, userController.review)
 router.post('/edit', auth.isAuthorized, userController.editInfo)
