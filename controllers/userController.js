@@ -6,10 +6,10 @@ const path = require("path");
 const fs = require("fs");
 const ApiError = require("../error/ApiError");
 const {
-	User, Rating, Ad, Favorite, ImageAd,
-	StatusAd, TypeAd, Objects, AdView, UserAvatar, PreviewImageAd
+	User, Rating, Ad, Favorite, ImageAd, RebasePassword,
+	StatusAd, TypeAd, Objects, UserAvatar, PreviewImageAd
 } = require('../models')
-const {HTML_REGISTRATION, transporter} = require("../utils");
+const {HTML_REGISTRATION, transporter, generateRandomNumbers, HTML_REBASE_PASSWORD} = require("../utils");
 
 
 const generateAccessToken = async (id) => {
@@ -294,6 +294,40 @@ class UserController {
 			res.json({message: 'done'})
 		} catch (e) {
 			return next(ApiError.badRequest(e.message))
+		}
+	}
+
+	async rebasePassword(req, res, next){
+		try {
+			const {email} = req.body
+			console.log(email)
+			if (!email) throw next(ApiError.forbidden('Поле почты пустое'))
+			const user = await User.findOne({
+				where: {email},
+				attributes: ['name', 'login'],
+				raw: true
+			})
+			if (!user) throw next(ApiError.forbidden('Пользователь с такой почтой не найден!'))
+			const code = generateRandomNumbers().join('')
+			await RebasePassword.create({email, code, active: true})
+			const EMAIL_USER = process.env.EMAIL_USER
+			const mailOptions = {
+				from: EMAIL_USER,
+				to: email,
+				subject: 'Код сброса пароля',
+				html: HTML_REBASE_PASSWORD(code, user.name)
+			};
+			await transporter.sendMail(mailOptions, function (error, info) {
+				if (error) {
+					console.log(error);
+				} else {
+					console.log('Email sent: ' + info.response);
+				}
+			});
+			return res.json({message: 'Код пктивации отправлен Вам на почту'})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest('Ошибка обработки сервера'))
 		}
 	}
 

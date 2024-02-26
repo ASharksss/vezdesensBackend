@@ -51,6 +51,53 @@ const HTML_REGISTRATION = (login, phone) => `<!DOCTYPE html>
 
 </body>
 </html>`
+const HTML_REBASE_PASSWORD = (code, name) => `<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .header {
+        background-color: #f1f1f1;
+        padding: 20px;
+        text-align: center;
+    }
+    .container {
+        background-color: #ffffff;
+        padding: 20px;
+        border: 1px solid #ddd;
+        margin-top: 20px;
+    }
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Смена пароля!</h1>
+</div>
+
+<div class="container">
+    <h2>Здравствуйте, ${name}</h2>
+    <p>Используйте этот код для подтверждения своей личности:</p>
+    <h1><code>${code}</code></h1>
+    <span>Если не Вы запросили запрос на сброс пароля, проигнорируйте это письмо</span>
+</div>
+
+</body>
+</html>`
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.beget.com',
@@ -193,9 +240,20 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
     }
 }
 
+function generateRandomNumbers() {
+    let numbers = [];
+    for (let i = 0; i < 6; i++) {
+        // Генерируем случайное число от 0 до 9 (включительно)
+        let randomNumber = Math.floor(Math.random() * 10);
+        numbers.push(randomNumber);
+    }
+    return numbers;
+}
+
 module.exports = {
     decryptArrayWithKey,
     groupByCharacteristic,
     transporter, HTML_REGISTRATION,
-    resizeImage
+    resizeImage, generateRandomNumbers,
+    HTML_REBASE_PASSWORD
 }

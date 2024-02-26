@@ -1,6 +1,6 @@
 const { Op } = require("sequelize")
 const ApiError = require("../error/ApiError");
-const {PositionRegion, PositionCity, PositionDistrict, PositionStreets} = require('../models')
+const {PositionCity} = require('../models')
 
 class PositionController {
 	async search(req, res, next) {
@@ -16,14 +16,8 @@ class PositionController {
 								`%${queryFiltered[0].trim()}%`
 								: `%${query.trim()}%`}
 				},
-				include: !!(queryFiltered !== undefined) && [{
-					model: PositionStreets,
-					where: { name: { [Op.like]: `%${queryFiltered[1].trim()}%`}},
-					attributes: ['name'],
-					limit: 5
-				}],
 				attributes: ['name', 'latitude', 'longitude'],
-				limit: queryFiltered !== undefined ? 1 : 5 
+				limit: queryFiltered !== undefined ? 1 : 5
 			})
 			return res.json(result)
 		} catch (e) {

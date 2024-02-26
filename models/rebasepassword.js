@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   RebasePassword.init({
     email: DataTypes.STRING,
-    code: DataTypes.STRING
+    code: DataTypes.STRING,
+    active: DataTypes.BOOLEAN,
   }, {
     sequelize,
     tableName: 'rebasePasswords',
