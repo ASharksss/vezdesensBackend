@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Rating.belongsTo(models.User, {
+        as: 'writer',
         foreignKey: 'customerId'
       })
       Rating.belongsTo(models.User, {

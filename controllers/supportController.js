@@ -80,15 +80,19 @@ class SupportController {
 
   async getAllAppeal(req, res, next) {
     try {
+			const userId = req.user
       const {statusOfAppealId} = req.query
       let appeal = await Appeal.findAll({
-        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
+				where: {userId},
+        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}],
+				order: [['createdAt', 'DESC']]
       })
 
       if (statusOfAppealId) {
         appeal = await Appeal.findAll({
-          where: {statusOfAppealId},
-          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}]
+          where: {statusOfAppealId, userId},
+          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}],
+					order: [['createdAt', 'DESC']]
         })
       }
 

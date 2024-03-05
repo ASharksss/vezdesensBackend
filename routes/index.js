@@ -26,7 +26,7 @@ router.use('/chat', auth.isAuthorized, chatRouter)
 router.use('/other', otherRouter)
 router.use('/geo', geoRouter)
 router.use('/position', positionRouter)
-router.use('/support', supportRouter)
+router.use('/support', auth.isAuthorized, supportRouter)
 
 
 module.exports = router

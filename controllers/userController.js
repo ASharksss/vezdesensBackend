@@ -134,6 +134,7 @@ class UserController {
 				attributes: ['id', 'createdAt', 'grade', 'text'],
 				include: [{
 					model: User,
+					as: 'writer',
 					attributes: ['id', 'login', 'name'],
 					include: {
 						model: UserAvatar,
@@ -155,6 +156,7 @@ class UserController {
 				attributes: ['id', 'createdAt', 'grade', 'text'],
 				include: [{
 					model: User,
+					as: 'writer',
 					attributes: ['id', 'login', 'name'],
 					include: {
 						model: UserAvatar,
