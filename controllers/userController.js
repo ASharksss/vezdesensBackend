@@ -353,6 +353,26 @@ class UserController {
 		}
 	}
 
+	async changePassword (req, res, next) {
+		try {
+			const {code, password} = req.body
+			const rebase = await RebasePassword.findOne({
+				where: {code},
+				raw: true
+			})
+			const user = await User.findOne({
+				where: {email: rebase.email}
+			})
+			const hashPassword = await bcrypt.hash(password, 10)
+			user.password = hashPassword
+			await user.save()
+			return res.json({message: 'Пароль изменен'})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest('Ошибка обработки сервера'))
+		}
+	}
+
 }
 
 
