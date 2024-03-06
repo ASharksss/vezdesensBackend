@@ -169,13 +169,13 @@ class AdController {
 			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
-				let fileName = 'st/' + uuid.v4() + '.webp'
-				await resizeImage(images.data, fileName, 'st')
+				let fileName = uuid.v4() + '.webp'
+				await resizeImage(images.data, fileName, 'card')
 				await ImageAd.create({adId: ad.id, name: fileName})
 			} else {
 				images.map(async (image) => {
-					let fileName = 'st/' + uuid.v4() + '.webp'
-					await resizeImage(image.data, fileName, 'st')
+					let fileName = uuid.v4() + '.webp'
+					await resizeImage(image.data, fileName, 'card')
 					await ImageAd.create({adId: ad.id, name: fileName})
 				})
 			}

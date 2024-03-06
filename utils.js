@@ -231,6 +231,12 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         if(err) console.log(err)
                     })
                 break;
+            case "card":
+                await sharp(image)
+                    .toFile(`static/${fileName}`, (err, info) => {
+                        if(err) console.log(err)
+                    })
+                break;
 
             default:
                 break;
