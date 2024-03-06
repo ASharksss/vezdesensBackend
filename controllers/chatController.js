@@ -62,36 +62,20 @@ class chatController {
     try {
 			const userId = req.user
 			let adsResult = []
-		console.log({userId})
 			const [data,] = await chatDB.query(
 				`SELECT
-						subquery.adId,
-						subquery.senderId,
-						subquery.receiverId,
-						MIN(subquery.lastMessage) AS lastMessage,
-						COALESCE(SUM(subquery.unreadCount), 0) AS unreadCount
-					FROM (
-						SELECT
-							chats.adId,
-							users.senderId,
-							COALESCE(users.receiverId, 0) AS receiverId,
-							messages.createdAt AS lastMessage,
-							COUNT(CASE WHEN messages.receiverRead = 0 THEN 1 ELSE NULL END) AS unreadCount
-						FROM messages
-						LEFT JOIN chats ON messages.chatId = chats.id
-						LEFT JOIN chat_users AS users ON users.chatId = messages.chatId
-						WHERE users.senderId != messages.senderId
-						GROUP BY chats.adId, users.senderId, receiverId, messages.createdAt
-					) AS subquery
-					WHERE subquery.senderId = ${userId}
-					GROUP BY subquery.adId, subquery.senderId, subquery.receiverId;`)
-			const newData = data.reduce((o, i) => {
-				if (!o.find(v => v.id === i.id)) {
-					o.push(i);
-				}
-				return o;
-			}, []);
-			const adIds = newData.map(item => {
+								c.adId,
+								cu.senderId,
+								cu.receiverId,
+								MAX(m.createdAt) AS lastMessage,
+								SUM(IF(m.receiverRead = 0 AND m.senderId != ${userId}, 1, 0)) AS unreadCount
+						FROM chats c
+						JOIN chat_users cu ON c.id = cu.chatId
+						LEFT JOIN messages m ON c.id = m.chatId
+						WHERE cu.senderId = ${userId} OR cu.receiverId = ${userId}
+						GROUP BY c.adId, cu.senderId, cu.receiverId;`)
+
+			const adIds = data.map(item => {
 				return {
 					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount, item.receiverId]
 				}
@@ -127,7 +111,6 @@ class chatController {
 					where: {id: receiverId},
 					attributes: ['id', 'name']
 				})
-				console.log(receiver)
 				ads.dataValues['lastMessage'] = lastMessage
 				ads.dataValues['chat'] = chatId
 				ads.dataValues['unreadCount'] = unreadCount
