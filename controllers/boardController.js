@@ -527,7 +527,7 @@ class BoardController {
 						model: ImageAd,
 						required: false
 					}, {
-						model: PreviewImageAd,
+						model: CommercialImageAd,
 						required: false
 					}],
 				},

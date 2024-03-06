@@ -122,7 +122,7 @@ class SearchController {
                                 attributes: ['name']
                             }, {
                                 model: Favorite,
-                                where: {userId: userId !== undefined ? userId : null},
+                                where: {userId},
                                 required: false
                             }]
                         }
