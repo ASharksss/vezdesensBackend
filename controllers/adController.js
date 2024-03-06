@@ -397,7 +397,15 @@ class AdController {
 			if (userId === null) {
 				return res.json(ApiError.forbidden('Ошибка токена'))
 			}
-			await Ad.update({statusAdId: 1}, {where: {id: adId}})
+			await Booking.destroy({ where: {adId} })
+			await PreviewImageAd.destroy({ where: {adId} })
+			await ImageAd.destroy({ where: {adId} })
+			await CommercialImageAd.destroy({ where: {adId} })
+			await AdCharacteristicInput.destroy({ where: {adId} })
+			await AdCharacteristicSelect.destroy({ where: {adId} })
+			await AdView.destroy({ where: {adId} })
+			await Favorite.destroy({ where: {adId} })
+			await Ad.destroy({ where: {id: adId} })
 			const ads = await Ad.findAll({
 				where: {userId},
 				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
