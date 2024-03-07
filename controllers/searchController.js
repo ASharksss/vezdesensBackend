@@ -83,7 +83,7 @@ class SearchController {
                             model: Ad,
                             where: {
                                 price: {[Op.between]: price},
-                                statusAdId: {[Op.or]: [2, 4]}
+                                statusAdId: 2
                             },
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {
@@ -114,7 +114,7 @@ class SearchController {
                             model: Ad,
                             where: {
                                 price: {[Op.between]: price},
-                                statusAdId: {[Op.or]: [2, 4]}
+                                statusAdId: 2
                             },
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {

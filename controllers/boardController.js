@@ -517,7 +517,7 @@ class BoardController {
 				where: [{isActive: true}],
 				include: {
 					model: Ad,
-					where: {statusAdId: 2},
+					where: {statusAdId: 2, typeAdId: 4},
 					include: [{
 						model: TypeAd
 					}, {
