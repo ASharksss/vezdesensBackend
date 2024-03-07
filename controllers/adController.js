@@ -552,6 +552,7 @@ class AdController {
 			} = req.body
 			const {images} = req.files
 			const {previewImage} = req.files
+			const {commercialImage} = req.files
 			const typeAdId = ad.dataValues.typeAdId
 
 			await Ad.update(
@@ -601,6 +602,31 @@ class AdController {
 					}
 				}
 			})
+			if (typeAdId === 2 || typeAdId === 3 || typeAdId === 4) {
+				const imagesDB = await CommercialImageAd.findAll({
+					where: {adId: id},
+					raw: true
+				})
+				imagesDB.map(async (item) => {
+					let fileName = item.name
+					const filePath = path.resolve(__dirname, '..', 'static', fileName);
+					await fs.unlink(filePath, (err) => {
+						if (err) {
+							console.error('Ошибка при удалении файла:', err);
+						} else {
+							console.log('Файл успешно удален');
+						}
+					});
+				})
+				await CommercialImageAd.destroy({
+					where: {adId: id}
+				})
+				let previewName = typeAdId === 2 ? 'stPl/' : typeAdId === 3 ? 'vp/' : 'premium/';
+				let cardType = typeAdId === 2 ? 'stPl' : typeAdId === 3 ? 'vp' : 'premium';
+				previewName = previewName + uuid.v4() + '.webp';
+				await resizeImage(commercialImage.data, previewName, cardType)
+				await CommercialImageAd.create({adId: ad.id, name: previewName})
+			}
 
 			const imagesDB = await ImageAd.findAll({
 				where: {adId: id},
@@ -641,25 +667,41 @@ class AdController {
 				where: {adId: id}
 			})
 
-			const previewName = uuid.v4() + '.jpg'
-			try {
-				await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
-				await PreviewImageAd.create({adId: ad.id, name: previewName})
-			} catch (e) {
-				console.log(e)
-			}
+			let previewName = 'st/pv/' + uuid.v4() + '.webp'
+			await resizeImage(previewImage.data, previewName, 'st')
+			await PreviewImageAd.create({adId: ad.id, name: previewName})
 
 			if (images.length === undefined) {
-				let fileName = uuid.v4() + '.jpg'
-				await images.mv(path.resolve(__dirname, '..', 'static', fileName))
+				let fileName = uuid.v4() + '.webp'
+				await resizeImage(images.data, fileName, 'card')
 				await ImageAd.create({adId: ad.id, name: fileName})
 			} else {
 				images.map(async (image) => {
-					let fileName = uuid.v4() + '.jpg'
-					await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+					let fileName = uuid.v4() + '.webp'
+					await resizeImage(image.data, fileName, 'card')
 					await ImageAd.create({adId: ad.id, name: fileName})
 				})
 			}
+
+			// const previewName = uuid.v4() + '.jpg'
+			// try {
+			// 	await previewImage.mv(path.resolve(__dirname, '..', 'static', previewName))
+			// 	await PreviewImageAd.create({adId: ad.id, name: previewName})
+			// } catch (e) {
+			// 	console.log(e)
+			// }
+			//
+			// if (images.length === undefined) {
+			// 	let fileName = uuid.v4() + '.webp'
+			// 	await images.mv(path.resolve(__dirname, '..', 'static', fileName))
+			// 	await ImageAd.create({adId: ad.id, name: fileName})
+			// } else {
+			// 	images.map(async (image) => {
+			// 		let fileName = uuid.v4() + '.webp'
+			// 		await image.mv(path.resolve(__dirname, '..', 'static', fileName))
+			// 		await ImageAd.create({adId: ad.id, name: fileName})
+			// 	})
+			// }
 			return res.json({message: 'Карточка изменена'})
 		} catch (e) {
 			return next(ApiError.badRequest(e.message))
