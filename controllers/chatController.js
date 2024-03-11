@@ -65,6 +65,7 @@ class chatController {
 			const [data,] = await chatDB.query(
 				`SELECT
 								c.adId,
+								c.id,
 								cu.senderId,
 								cu.receiverId,
 								MAX(m.createdAt) AS lastMessage,
@@ -73,9 +74,15 @@ class chatController {
 						JOIN chat_users cu ON c.id = cu.chatId
 						LEFT JOIN messages m ON c.id = m.chatId
 						WHERE cu.senderId = ${userId} OR cu.receiverId = ${userId}
-						GROUP BY c.adId, cu.senderId, cu.receiverId;`)
-
-			const adIds = data.map(item => {
+						GROUP BY c.adId, cu.senderId, cu.receiverId, c.id
+            			ORDER BY lastMessage DESC;`)
+			const newData = data.reduce((o, i) => {
+				if (!o.find(v => v.id === i.id)) {
+					o.push(i);
+				}
+				return o;
+			}, []);
+			const adIds = newData.map(item => {
 				return {
 					[item.adId]: [item.senderId, item.lastMessage, item.id, item.unreadCount, item.receiverId]
 				}
@@ -112,9 +119,11 @@ class chatController {
 					attributes: ['id', 'name']
 				})
 				ads.dataValues['lastMessage'] = lastMessage
+				ads.dataValues['receiver'] = receiver
+				ads.dataValues['senderId'] = sender.dataValues.id
 				ads.dataValues['chat'] = chatId
 				ads.dataValues['unreadCount'] = unreadCount
-				adsResult.push([ads, sender])
+				adsResult.push([ads, receiver])
 			}
       return res.json(adsResult)
     } catch (e) {
