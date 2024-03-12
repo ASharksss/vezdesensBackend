@@ -13,6 +13,7 @@ const characteristicRouter = require('./admin/CharacteristicRouter')
 const otherRouter = require('./otherRouter')
 const searchRouter = require('./searchRouter')
 const supportRouter = require('./supportRouter')
+const paymentRouter = require('./paymentRouter')
 const auth = require('../middleware/AuthHandingMiddleware')
 
 
@@ -26,6 +27,7 @@ router.use('/chat', auth.isAuthorized, chatRouter)
 router.use('/other', otherRouter)
 router.use('/geo', geoRouter)
 router.use('/position', positionRouter)
+router.use('/payment', paymentRouter)
 router.use('/support', auth.isAuthorized, supportRouter)
 
 

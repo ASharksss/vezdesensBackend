@@ -127,6 +127,7 @@ class chatController {
 			}
       return res.json(adsResult)
     } catch (e) {
+		console.log(e)
       return next(ApiError.badRequest(e.message))
     }
   }

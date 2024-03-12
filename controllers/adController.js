@@ -18,7 +18,7 @@ class AdController {
 
 	async createAd(req, res, next) {
 		try {
-			const {
+			let {
 				title, price, description, address, longevity, showPhone,
 				typeAd, statusAdId, objectId, bookingDateStart, bookingDateEnd,
 				characteristicsInput, characteristicsSelect, position
@@ -52,13 +52,13 @@ class AdController {
 					return next(ApiError.badRequest('Некорректно введены даты'))
 				} else {
 					//Определяем срок бронирования
-					time = (new Date(bookingDateEnd) - new Date(bookingDateStart)) / 1000 / 60 / 60 / 24
+					time = ((new Date(bookingDateEnd) - new Date(bookingDateStart)) / 1000 / 60 / 60 / 24) - 1
 
 					//Определяем стоимость бронирования
 					cost = time * priceTypeAd.price
 
 					//Тут функция оплаты
-
+					statusAdId = 5
 					//Создаем объявление
 					ad = await Ad.create({
 						title, price, description, showPhone, objectId,
