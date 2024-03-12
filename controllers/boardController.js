@@ -24,7 +24,6 @@ class BoardController {
 			currentDate.setHours(0, 0, 0, 0)
 			allAds = await Ad.findAll()
 			bookings = await Booking.findAll()
-			console.log('Position', req.position)
 
 			//Перебор всех объявлений
 			for (const ad of allAds) {
@@ -171,6 +170,7 @@ class BoardController {
 						model: CommercialImageAd,
 						required: false
 					}],
+					order: [['createdAt', 'DESC']],
 					limit: 1,
 					offset: vipOffset
 				})
@@ -195,6 +195,7 @@ class BoardController {
 						model: CommercialImageAd,
 						required: false
 					}],
+					order: [['createdAt', 'DESC']],
 					limit: adsCommercialLimit,
 					offset: commercialOffset
 				})
@@ -418,6 +419,7 @@ class BoardController {
 						model: CommercialImageAd,
 						required: false
 					}],
+					order: [['createdAt', 'DESC']],
 					limit: 1,
 					offset: vipOffset
 				})
@@ -438,6 +440,7 @@ class BoardController {
 						model: CommercialImageAd,
 						required: false
 					}],
+					order: [['createdAt', 'DESC']],
 					limit: 2,
 					offset: commercialOffset
 				})
