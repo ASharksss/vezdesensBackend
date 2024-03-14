@@ -102,6 +102,30 @@ class SupportController {
       return next(ApiError.badRequest(e.message))
     }
   }
+  async getAllAppealSupport(req, res, next) {
+    try {
+			const userId = req.user
+      if (userId !== 3) return res.json({message: 'нет доступа'})
+      const {statusOfAppealId} = req.query
+      let appeal = await Appeal.findAll({
+        include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}],
+				order: [['createdAt', 'DESC']]
+      })
+
+      if (statusOfAppealId) {
+        appeal = await Appeal.findAll({
+          where: {statusOfAppealId},
+          include: [{model: StatusOfAppeal}, {model: TopicOfAppeal}],
+					order: [['createdAt', 'DESC']]
+        })
+      }
+
+
+      return res.json(appeal)
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
 
   async getMessagesOfAppeal(req, res, next) {
     try {

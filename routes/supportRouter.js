@@ -12,6 +12,7 @@ router.post('/createMessage', supportController.createMessage)
 router.put('/closeAppeal', supportController.closeAppeal)
 
 router.get('/getAllAppeal', supportController.getAllAppeal)
+router.get('/getAllAppealSupport', supportController.getAllAppealSupport)
 router.get('/getMessagesOfAppeal', supportController.getMessagesOfAppeal)
 router.get('/getTopicAppeals', supportController.getTopicAppeals)
 
