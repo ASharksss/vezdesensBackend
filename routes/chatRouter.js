@@ -9,6 +9,7 @@ router.get('/getMessages', chatController.getMessages)
 router.get('/check', chatController.getCheckNewMessages)
 router.post('/addDialogues', chatController.addDialogues)
 router.post('/addMessage', chatController.addMessage)
+router.delete('/remove', chatController.removeChats)
 
 module.exports = router
 

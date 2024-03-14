@@ -13,6 +13,7 @@ const {
 } = require('../models');
 const {Op} = require("sequelize");
 const {resizeImage} = require("../utils");
+const crypto = require("crypto");
 
 class AdController {
 
@@ -245,6 +246,9 @@ class AdController {
 				}, {
 					model: ImageAd,
 					required: false
+				}, {
+					model:  TypeAd,
+					attributes: ['id', 'name']
 				}]
 			})
 
@@ -276,6 +280,70 @@ class AdController {
 			let today = new Date()
 			today.setUTCHours(0, 0, 0, 0)
 			today = today.toISOString().split('T')[0]
+			if (ad.dataValues.typeAd.dataValues.id !== 1) {
+				let booking = undefined
+				const currentDate = new Date().setHours(15,0,0,0)
+				if (userId) {
+					booking = await Booking.findOne({
+						where: {adId},
+						attributes: ['id', 'cost', 'userId'],
+						include: {
+							model: Ad,
+							attributes: ['id'],
+							where: {
+								[Op.or]: [
+									{statusAdId: 3},
+									{statusAdId: 5}
+								]
+							}
+						},
+						raw: true
+					})
+				}
+				console.log(booking, userId)
+				if (booking === undefined || userId === null || (booking !== null && booking['userId'] !== userId)) {
+					return next(ApiError.forbidden('Нет доступа'))
+				} else {
+					const bookings = await Booking.findAll({
+						where: {userId},
+						include: [{
+							model: Ad,
+							attributes: ['id'],
+							where: {statusAdId: 5}
+						}, {
+							model: TypeAd,
+							attributes: ['price']
+						}],
+						raw: true
+					})
+					for (let i = 0; i < bookings.length; i++) {
+						if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate){
+							const time = (new Date(bookings[i]['dateEnd']) - currentDate) / 1000 / 60 / 60 / 24
+							const cost = time * bookings[i]['typeAd.price']
+							bookings[i]['cost'] = cost
+							bookings[i]['dateStart'] = currentDate
+							await Booking.update({cost, dateStart: currentDate}, {
+								where: {id: bookings[i]['id']}
+							})
+						} else {
+							const adId = bookings[i]['adId']
+							await Ad.update({statusAdId: 3}, {where: {id: adId}})
+						}
+					}
+				}
+				if (booking !== null) {
+					const payment_description = `Наименование: "${ad.dataValues.title}" \n Тип: "${ad.dataValues.typeAd.dataValues.name}"`
+					const robokassaLogin = process.env.ROBOKASSA_LOGIN
+					const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
+					let crcData = `${robokassaLogin}:${booking['cost']}:${booking['id']}:${robokassaPassword}`
+					const crc = crypto.createHash('md5').update(crcData).digest("hex");
+					const payment = `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=vezdesens&OutSum=${booking['cost']}&InvoiceID=${booking['id']}&Description=${payment_description}&SignatureValue=${crc}&IsTest=1`
+					ad.dataValues.payment = {
+						cost: booking['cost'],
+						href: payment
+					}
+				}
+			}
 			const {count, rows} = await AdView.findAndCountAll({
 				where: [{adId}, {createdAt: {
 						[Op.and]: {
@@ -291,6 +359,7 @@ class AdController {
 
 			return res.json({ad})
 		} catch (e) {
+			console.log(e)
 			return next(ApiError.badRequest(e.message))
 		}
 
@@ -707,10 +776,6 @@ class AdController {
 			return next(ApiError.badRequest(e.message))
 		}
 	}
-	async deleteAd(req, res) {
-
-	}
-
 
 }
 

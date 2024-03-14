@@ -61,21 +61,22 @@ class chatController {
   async getMessages(req, res, next) {
     try {
 			const userId = req.user
+			const {order = 'DESC'} = req.query
 			let adsResult = []
 			const [data,] = await chatDB.query(
 				`SELECT
-								c.adId,
-								c.id,
-								cu.senderId,
-								cu.receiverId,
-								MAX(m.createdAt) AS lastMessage,
-								SUM(IF(m.receiverRead = 0 AND m.senderId != ${userId}, 1, 0)) AS unreadCount
-						FROM chats c
-						JOIN chat_users cu ON c.id = cu.chatId
-						LEFT JOIN messages m ON c.id = m.chatId
-						WHERE cu.senderId = ${userId} OR cu.receiverId = ${userId}
-						GROUP BY c.adId, cu.senderId, cu.receiverId, c.id
-            			ORDER BY lastMessage DESC;`)
+											c.adId,
+											c.id,
+											cu.senderId,
+											cu.receiverId,
+											MAX(m.createdAt) AS lastMessage,
+											SUM(IF(m.receiverRead = 0 AND m.senderId != ${userId}, 1, 0)) AS unreadCount
+									FROM chats c
+									JOIN chat_users cu ON c.id = cu.chatId
+									LEFT JOIN messages m ON c.id = m.chatId
+									WHERE cu.senderId = ${userId} OR cu.receiverId = ${userId}
+									GROUP BY c.adId, cu.senderId, cu.receiverId, c.id
+            			ORDER BY lastMessage ${order};`)
 			const newData = data.reduce((o, i) => {
 				if (!o.find(v => v.id === i.id)) {
 					o.push(i);
@@ -131,6 +132,27 @@ class chatController {
       return next(ApiError.badRequest(e.message))
     }
   }
+
+	async removeChats(req, res, next) {
+		try {
+			const {chats} = req.body
+			for (let i = 0; i < chats.length; i++) {
+				await fetch(`${process.env.CHAT_URL}/${chats[i]}`, {
+					method: 'DELETE'
+				}).then(async response => {
+					const data = await response.json()
+					console.log(data)
+				}).catch(async error => {
+					const err = error
+					console.log(err)
+				})
+			}
+			return res.json({message: 'Ok'})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest(e.message))
+		}
+	}
 }
 
 

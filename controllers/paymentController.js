@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const {Op} = require('sequelize');
 const ApiError = require("../error/ApiError");
 const {
     Ad, Booking, TypeAd, PreviewImageAd
@@ -12,14 +13,45 @@ class PaymentController {
                 pathKey[newNameKey] = pathKey[oldNameKey];
                 delete pathKey[oldNameKey];
             }
-
+            const currentDate = new Date().setHours(15,0,0,0)
+            const bookings = await Booking.findAll({
+                where: {userId},
+                include: [{
+                    model: Ad,
+                    attributes: ['id'],
+                    where: {statusAdId: 5}
+                }, {
+                    model: TypeAd,
+                    attributes: ['price']
+                }],
+                raw: true
+            })
+            for (let i = 0; i < bookings.length; i++) {
+                if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate){
+                    const time = (new Date(bookings[i]['dateEnd']) - currentDate) / 1000 / 60 / 60 / 24
+                    const cost = time * bookings[i]['typeAd.price']
+                    bookings[i]['cost'] = cost
+                    bookings[i]['dateStart'] = currentDate
+                    await Booking.update({cost, dateStart: currentDate}, {
+                        where: {id: bookings[i]['id']}
+                    })
+                } else {
+                    const adId = bookings[i]['adId']
+                    await Ad.update({statusAdId: 3}, {where: {id: adId}})
+                }
+            }
             let ads = await Booking.findAll({
                 where: {userId},
                 attributes: ['id', 'cost'],
                 include: [{
                     model: Ad,
-                    where: {statusAdId: 5},
-                    attributes: ['title', 'price'],
+                    where: {
+                        [Op.or]: [
+                            {statusAdId: 3},
+                            {statusAdId: 5}
+                        ]
+                    },
+                    attributes: ['id', 'title'],
                     include: [{
                         model: PreviewImageAd,
                         attributes: ['name']
@@ -35,15 +67,16 @@ class PaymentController {
                 fChangeKeyName(ads[i], 'cost', 'OutSum')
                 fChangeKeyName(ads[i], 'id', 'InvId')
                 fChangeKeyName(ads[i], 'typeAd.name', 'name')
-                fChangeKeyName(ads[i], "ad.price", 'price')
+                fChangeKeyName(ads[i], "ad.id", 'adId')
                 fChangeKeyName(ads[i], "ad.previewImageAds.name", 'previewImage')
-                ads[i]['Description'] = `Наименование: "${ads[i]['title']}" \nТип: "${ads[i]['name']}"`
-                ads[i]['IsTest'] = 1
+                const payment_description = `Наименование: "${ads[i]['title']}" \nТип: "${ads[i]['name']}"`
                 const robokassaLogin = process.env.ROBOKASSA_LOGIN
                 const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
                 let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${robokassaPassword}`
-                ads[i]['crc'] = crypto.createHash('md5').update(crcData).digest("hex");
+                const crc = crypto.createHash('md5').update(crcData).digest("hex");
+                ads[i]['paymentHref'] = `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=vezdesens&OutSum=${ads[i]['OutSum']}&InvoiceID=${ads[i]['InvId']}&Description=${payment_description}&SignatureValue=${crc}&IsTest=1`
                 delete ads[i]["ad.previewImageAds.id"]
+                delete ads[i]["InvId"]
             }
             // https://docs.robokassa.ru/testing-mode/ Документация для тестового
             return res.json(ads)
