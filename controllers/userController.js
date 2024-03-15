@@ -175,7 +175,7 @@ class UserController {
 			const id = req.params.id
 			let user = await User.findOne({
 				where: {id},
-				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone'],
+				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone', 'showPhone'],
 				include: [{
 					model: UserAvatar,
 					attributes: ['name'],
@@ -215,6 +215,9 @@ class UserController {
 				} else {
 					user.dataValues.ads[i].dataValues.favoritesCount = 0
 				}
+			}
+			if (!user.dataValues.showPhone) {
+				delete user.dataValues.phone
 			}
 			return res.json(user)
 		} catch (e) {
@@ -372,6 +375,80 @@ class UserController {
 		} catch (e) {
 			console.log(e)
 			return next(ApiError.badRequest('Ошибка обработки сервера'))
+		}
+	}
+
+	async checkINN(req, res, next) {
+		const {inn} = req.body
+		const formdata = new FormData();
+		formdata.append("inn", inn);
+
+		const requestOptions = {
+			method: "POST",
+			body: formdata,
+			redirect: "follow"
+		};
+
+		return await fetch("https://htmlweb.ru/api/service/org?json", requestOptions)
+			.then(async (response) => response.text())
+			.then(async (result) => res.json(JSON.parse(result)))
+			.catch(async (error) => new Error(error));
+	}
+
+	async registrationCompany(req, res, next) {
+		try {
+			const {name, email, phone, login, password, inn, companyName} = req.body
+			const hashPassword = await bcrypt.hash(password, 10)
+			const user = await User.findOrCreate({
+				where: {
+					[Op.or]: [{email}, {login}, {phone}]
+				},
+				defaults: {email, login, name, phone, password: hashPassword, inn, companyName, isCompany: true},
+				raw: true
+			}).catch(err => {
+				console.log('Error', err)
+				return next(ApiError.badRequest(err))
+			}).then((data) => {
+				const [result, created] = data
+				if (!created) {
+					return next(ApiError.forbidden("Почта, логин или телефон уже заняты!"))
+				}
+				return result
+			})
+			if (user !== undefined) {
+				const EMAIL_USER = process.env.EMAIL_USER
+				const mailOptions = {
+					from: EMAIL_USER,
+					to: email,
+					subject: 'Регистрация на сайте',
+					html: HTML_REGISTRATION(login, phone)
+				};
+				await transporter.sendMail(mailOptions, function (error, info) {
+					if (error) {
+						console.log(error);
+					} else {
+						console.log('Email sent: ' + info.response);
+					}
+				});
+			}
+			const token = await generateAccessToken(user.id);
+			return res.json({token, username: user.login, profile: user})
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
+	}
+
+	async showPhone(req, res, next) {
+		try {
+			const userId = req.user
+			const {show= false} = req.body
+			await User.update({showPhone: show}, {
+				where: {id: userId}
+			})
+			return res.json({message: 'Изменено'})
+		} catch (e) {
+			console.log(e)
+			return next(ApiError.badRequest(e.message))
 		}
 	}
 

@@ -150,7 +150,7 @@ class SearchController {
                         }))
                     );
             }
-
+            newArray = newArray.sort((a, b) => b.id - a.id)
             return res.json({ads: newArray, offset: newArray.length})
         } catch (e) {
             console.log(e)

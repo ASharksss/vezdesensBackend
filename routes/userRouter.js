@@ -17,6 +17,9 @@ router.post('/password/code', userController.checkCode)
 router.post('/registration', userController.registration)
 router.post('/review', auth.isAuthorized, userController.review)
 router.post('/edit', auth.isAuthorized, userController.editInfo)
+router.post('/checkINN', userController.checkINN)
+router.post('/registrationCompany', userController.registrationCompany)
+router.post('/showPhone', auth.isAuthorized, userController.showPhone)
 
 
 router.get('/:id')
