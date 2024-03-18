@@ -415,7 +415,10 @@ class AdController {
 			if (userId === null) {
 				return res.json(ApiError.forbidden('Ошибка токена'))
 			}
-			await Ad.update({statusAdId: 2}, {where: {id: adId}})
+			const dateEndActive = new Date()
+			dateEndActive.setHours(15,0,0,0)
+			dateEndActive.setDate(dateEndActive.getDate() + 30)
+			await Ad.update({statusAdId: 2, dateEndActive}, {where: {id: adId}})
 			const ads = await Ad.findAll({
 				where: {userId},
 				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
@@ -497,9 +500,14 @@ class AdController {
 	async searchAd(req, res, next) {
 		try {
 			const {query} = req.query
+			const cities = req.cities
 			const ads = await Ad.findAll({
 				where: {
-					title: {[Op.like]: `%${query}%`}
+					title: {[Op.like]: `%${query}%`},
+					statusAdId: 2,
+					address: cities !== undefined && {
+						[Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+					}
 				},
 				include: [{
 					model: ImageAd,

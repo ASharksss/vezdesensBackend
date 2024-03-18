@@ -256,10 +256,23 @@ function generateRandomNumbers() {
     return numbers;
 }
 
+function trimEndings(str) {
+    // Создаем регулярное выражение для поиска окончаний слов
+    const regExpWord = /[а-яё]+(?=[^\s]*\s|$)/gi;
+
+    // Находим все слова в строке и обрезаем их окончания
+    const trimWords = str.match(regExpWord).map(item => {
+        // Обрезаем окончание слова
+        return item.replace(/(ость|ость|ия|ия|ие|ие|ий|ий|ый|ый|ая|ая|ое|ое|ые|ые|ые|ые|ого|ого|его|его|ому|ому|ему|ему|им|им|ым|ым|ом|ом|ем|ем|их|их|ых|ых|ую|ую|юю|юю|ая|ая|яя|яя|ею|ею|ию|ию)$/i, '');
+    });
+
+    return trimWords.join(' ');
+}
+
 module.exports = {
     decryptArrayWithKey,
     groupByCharacteristic,
     transporter, HTML_REGISTRATION,
     resizeImage, generateRandomNumbers,
-    HTML_REBASE_PASSWORD
+    HTML_REBASE_PASSWORD, trimEndings
 }

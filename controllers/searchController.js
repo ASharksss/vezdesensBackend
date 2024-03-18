@@ -12,6 +12,7 @@ class SearchController {
         try {
             const {query, object, subCategory, category, offset = 0} = req.query;
             const userId = req.user;
+            const cities = req.cities;
             let objectIds = [], objectValues = [], price = [0, 1500000000], allAds = null;
             if (query !== undefined) {
                 if (query.indexOf(', ') > 0) {
@@ -83,7 +84,10 @@ class SearchController {
                             model: Ad,
                             where: {
                                 price: {[Op.between]: price},
-                                statusAdId: 2
+                                statusAdId: 2,
+                                address: cities !== undefined && {
+                                    [Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+                                }
                             },
                             attributes: ['id', 'title', 'price', 'description', 'address', 'views', 'showPhone', 'createdAt', 'typeAdId'],
                             include: [selectInclude, inputsInclude, {

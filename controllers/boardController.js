@@ -19,17 +19,17 @@ class BoardController {
 				blockOffset = parseInt(offset.split('|')[0]),
 				commercialOffset = parseInt(offset.split('|')[1]),
 				vipOffset = parseInt(offset.split('|')[2])
-			const userId = req.user
+			const userId = req.user 	// id пользователя, если он авторизован
+			const cities = req.cities 	// список городов в регионе ['Казань', 'Альметьевск', ...]
 			const currentDate = new Date()
 			currentDate.setHours(0, 0, 0, 0)
 			allAds = await Ad.findAll()
 			bookings = await Booking.findAll()
-
 			//Перебор всех объявлений
 			for (const ad of allAds) {
 				//Проверка на просроченные объявления
 				if (new Date(ad.dateEndActive) < currentDate) {
-					ad.statusAdId = 3
+					ad.statusAdId = 2
 					await ad.save()
 				}
 				//Перебор всех бронирований
@@ -96,7 +96,10 @@ class BoardController {
 							model: Ad,
 							where: {
 								statusAdId: 2,
-								price: {[Op.between]: price}
+								price: {[Op.between]: price},
+								address: cities !== undefined && {
+									[Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+								}
 							},
 							include: [{
 								model: AdCharacteristicInput,
@@ -133,7 +136,10 @@ class BoardController {
 				ads = await Ad.findAll({
 					where: {
 						statusAdId: 2,
-						typeAdId: 1
+						typeAdId: 1,
+						address: cities !== undefined && {
+							[Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+						}
 					},
 					include: [{
 						model: TypeAd,
@@ -155,7 +161,10 @@ class BoardController {
 				const adsVip = await Ad.findAll({
 					where: {
 						typeAdId: 3,
-						statusAdId: 2
+						statusAdId: 2,
+						address: cities !== undefined && {
+							[Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+						}
 					},
 					include: [{
 						model: TypeAd,
@@ -180,7 +189,10 @@ class BoardController {
 				const adsCommercial = await Ad.findAll({
 					where: {
 						typeAdId: 2,
-						statusAdId: 2
+						statusAdId: 2,
+						address: cities !== undefined && {
+							[Op.or]: cities.map(name => ({ [Op.like]: `%${name}%` }))
+						}
 					},
 					include: [{
 						model: TypeAd,
@@ -216,7 +228,11 @@ class BoardController {
 				ads = await Ad.findAll({
 					where: [
 						{id: {[Op.notIn]: ignoreIds}},
-						{statusAdId: 2}
+						{statusAdId: 2},
+						{address: cities !== undefined && {
+								[Op.or]: cities.map(name => ({[Op.like]: `%${name}%`}))
+							}
+						}
 					],
 					include: includeArray,
 					order: literal('rand()'),
@@ -235,7 +251,12 @@ class BoardController {
 						{objectId: objectId},
 						{id: {[Op.notIn]: ignoreIds}},
 						{typeAdId: 1},
-						{statusAdId: 2}
+						{statusAdId: 2},
+						{address: {
+							[Op.like]: {
+								[Op.any]: cities.map(name => `%${name}%`)
+							}
+						}}
 					],
 					include: [{
 							model: TypeAd
