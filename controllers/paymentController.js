@@ -6,6 +6,21 @@ const {
 } = require('../models');
 
 class PaymentController {
+
+    receipt = (name, sum) => ({
+        "sno": "usn_income_outcome",				                // usn_income_outcome - Упрощенная СН (доходы минус расходы)
+        "items": [
+            {
+                "name": `Продвижение, услуга ${name}`,	// Наименование товара/услуг
+                "quantity": 1,						                // Количество
+                "sum": `${parseInt(sum)}`,				// Общая стоимость (cost*quantity)=sum
+                "payment_method": "full_payment", 	                // full_payment - полный расчёт
+                "payment_object": "service",			            // service - услуга
+                "tax": "none"							            // без ндс
+            }
+        ]
+    })
+
     async payAd(req, res, next) {
         try {
             const userId = req.user
@@ -69,10 +84,11 @@ class PaymentController {
                 fChangeKeyName(ads[i], 'typeAd.name', 'name')
                 fChangeKeyName(ads[i], "ad.id", 'adId')
                 fChangeKeyName(ads[i], "ad.previewImageAds.name", 'previewImage')
+                const receiptURLEncode = encodeURIComponent(JSON.stringify(this.receipt(ads[i]['name'], ads[i]['OutSum'])))
                 const payment_description = `Наименование: "${ads[i]['title']}" \nТип: "${ads[i]['name']}"`
                 const robokassaLogin = process.env.ROBOKASSA_LOGIN
                 const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
-                let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${robokassaPassword}`
+                let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${receiptURLEncode}:${robokassaPassword}`
                 const crc = crypto.createHash('md5').update(crcData).digest("hex");
                 ads[i]['paymentHref'] = `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=vezdesens&OutSum=${ads[i]['OutSum']}&InvoiceID=${ads[i]['InvId']}&Description=${payment_description}&SignatureValue=${crc}&IsTest=1`
                 delete ads[i]["ad.previewImageAds.id"]
@@ -90,14 +106,20 @@ class PaymentController {
         try {
             const {OutSum, InvId, SignatureValue} = req.query
             const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
-            let crcData = `${OutSum}:${InvId}:${robokassaPassword}`
+            const booking = await Booking.findOne({
+                where: {id: InvId},
+                include: {
+                    model: TypeAd,
+                    attributes: ['name']
+                },
+                raw: true
+            })
+            if (!booking) return res.json({message: 'oshibka'});
+            const receiptURLEncode = encodeURIComponent(JSON.stringify(this.receipt(booking['typeAd.name'], booking['cost'])))
+            let crcData = `${OutSum}:${InvId}:${receiptURLEncode}:${robokassaPassword}`
             const crc = crypto.createHash('md5').update(crcData).digest("hex");
             if (crc !== SignatureValue) return res.json({message: 'oshibka'})
             await Booking.update({isActive: 1}, {where: {id: InvId}})
-            const booking = await Booking.findOne({
-                where: {id: InvId},
-                raw: true
-            })
             await Ad.update({statusAdId: 2}, {where: {id: booking['adId']}})
             return res.redirect(`https://vezdesens.ru/profile/${booking['userId']}#ads`)
         } catch (e) {
