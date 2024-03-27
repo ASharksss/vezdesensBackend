@@ -234,7 +234,7 @@ class AdController {
 					required: false
 				}, {
 					model: User,
-					attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt'],
+					attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt', 'companyName', 'isCompany'],
 					include: {
 						model: Rating,
 						attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
@@ -300,7 +300,6 @@ class AdController {
 						raw: true
 					})
 				}
-				console.log(booking, userId)
 				if (booking === undefined || userId === null || (booking !== null && booking['userId'] !== userId)) {
 					return next(ApiError.forbidden('Нет доступа'))
 				} else {

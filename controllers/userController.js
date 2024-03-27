@@ -175,7 +175,7 @@ class UserController {
 			const id = req.params.id
 			let user = await User.findOne({
 				where: {id},
-				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone', 'showPhone'],
+				attributes: ['id', 'login', 'email', 'createdAt', 'name', 'phone', 'showPhone', 'companyName', 'isCompany'],
 				include: [{
 					model: UserAvatar,
 					attributes: ['name'],
@@ -218,6 +218,9 @@ class UserController {
 			}
 			if (!user.dataValues.showPhone) {
 				delete user.dataValues.phone
+			}
+			if (!user.dataValues.isCompany) {
+				delete user.dataValues.companyName
 			}
 			return res.json(user)
 		} catch (e) {
@@ -379,20 +382,24 @@ class UserController {
 	}
 
 	async checkINN(req, res, next) {
-		const {inn} = req.body
-		const formdata = new FormData();
-		formdata.append("inn", inn);
+		try {
+			const {inn} = req.body
+			const formdata = new FormData();
+			formdata.append("inn", inn);
 
-		const requestOptions = {
-			method: "POST",
-			body: formdata,
-			redirect: "follow"
-		};
+			const requestOptions = {
+				method: "POST",
+				body: formdata,
+				redirect: "follow"
+			};
 
-		return await fetch("https://htmlweb.ru/api/service/org?json", requestOptions)
-			.then(async (response) => response.text())
-			.then(async (result) => res.json(JSON.parse(result)))
-			.catch(async (error) => new Error(error));
+			return await fetch("https://htmlweb.ru/api/service/org?json", requestOptions)
+				.then(async (response) => response.text())
+				.then(async (result) => res.json(JSON.parse(result)))
+				.catch(async (error) => new Error(error));
+		} catch (e) {
+			return next(ApiError.badRequest(e.message))
+		}
 	}
 
 	async registrationCompany(req, res, next) {
