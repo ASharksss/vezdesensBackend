@@ -2,33 +2,20 @@ const crypto = require('crypto');
 const {Op} = require('sequelize');
 const ApiError = require("../error/ApiError");
 const {
-    Ad, Booking, TypeAd, PreviewImageAd
+    Ad, Booking, TypeAd, PreviewImageAd, User
 } = require('../models');
 
 class PaymentController {
-
-    receipt = (name, sum) => ({
-        "sno": "usn_income_outcome",				                // usn_income_outcome - Упрощенная СН (доходы минус расходы)
-        "items": [
-            {
-                "name": `Продвижение, услуга ${name}`,	// Наименование товара/услуг
-                "quantity": 1,						                // Количество
-                "sum": `${parseInt(sum)}`,				// Общая стоимость (cost*quantity)=sum
-                "payment_method": "full_payment", 	                // full_payment - полный расчёт
-                "payment_object": "service",			            // service - услуга
-                "tax": "none"							            // без ндс
-            }
-        ]
-    })
-
     async payAd(req, res, next) {
         try {
             const userId = req.user
+
             function fChangeKeyName(pathKey, oldNameKey, newNameKey) {
                 pathKey[newNameKey] = pathKey[oldNameKey];
                 delete pathKey[oldNameKey];
             }
-            const currentDate = new Date().setHours(15,0,0,0)
+
+            const currentDate = new Date().setHours(15, 0, 0, 0)
             const bookings = await Booking.findAll({
                 where: {userId},
                 include: [{
@@ -42,7 +29,7 @@ class PaymentController {
                 raw: true
             })
             for (let i = 0; i < bookings.length; i++) {
-                if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate){
+                if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate) {
                     const time = (new Date(bookings[i]['dateEnd']) - currentDate) / 1000 / 60 / 60 / 24
                     const cost = time * bookings[i]['typeAd.price']
                     bookings[i]['cost'] = cost
@@ -74,23 +61,35 @@ class PaymentController {
                 }, {
                     model: TypeAd,
                     attributes: ['name']
+                }, {
+                    model: User,
+                    attributes: ['email']
                 }],
                 raw: true
             })
+            const robokassaLogin = process.env.ROBOKASSA_LOGIN
+            const robokassIsTest = process.env.ROBOKASSA_IS_TEST || 1
+            const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
             for (let i = 0; i < ads.length; i++) {
                 fChangeKeyName(ads[i], 'ad.title', 'title')
                 fChangeKeyName(ads[i], 'cost', 'OutSum')
                 fChangeKeyName(ads[i], 'id', 'InvId')
                 fChangeKeyName(ads[i], 'typeAd.name', 'name')
                 fChangeKeyName(ads[i], "ad.id", 'adId')
+                fChangeKeyName(ads[i], "user.email", 'email')
                 fChangeKeyName(ads[i], "ad.previewImageAds.name", 'previewImage')
-                const receiptURLEncode = encodeURIComponent(JSON.stringify(this.receipt(ads[i]['name'], ads[i]['OutSum'])))
-                const payment_description = `Наименование: "${ads[i]['title']}" \nТип: "${ads[i]['name']}"`
-                const robokassaLogin = process.env.ROBOKASSA_LOGIN
-                const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
+                const receiptData = receipt(ads[i]['name'], ads[i]['OutSum'])
+                const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData))
                 let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${receiptURLEncode}:${robokassaPassword}`
                 const crc = crypto.createHash('md5').update(crcData).digest("hex");
-                ads[i]['paymentHref'] = `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=vezdesens&OutSum=${ads[i]['OutSum']}&InvoiceID=${ads[i]['InvId']}&Description=${payment_description}&SignatureValue=${crc}&IsTest=1`
+                const invoice = await postData(robokassaLogin, ads[i]['OutSum'], ads[i]['InvId'], receiptURLEncode, crc, ads[i]['email'], robokassIsTest)
+                    .then(async data => {
+                        return data?.invoiceID;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при выполнении запроса:', error);
+                    });
+                ads[i]['paymentHref'] = `https://auth.robokassa.ru/Merchant/Index/${invoice}`
                 delete ads[i]["ad.previewImageAds.id"]
                 delete ads[i]["InvId"]
             }
@@ -114,9 +113,8 @@ class PaymentController {
                 },
                 raw: true
             })
-            if (!booking) return res.json({message: 'oshibka'});
-            const receiptURLEncode = encodeURIComponent(JSON.stringify(this.receipt(booking['typeAd.name'], booking['cost'])))
-            let crcData = `${OutSum}:${InvId}:${receiptURLEncode}:${robokassaPassword}`
+            if (!booking) return res.json({message: 'oshibka, ne nashel zakaz'});
+            let crcData = `${OutSum}:${InvId}:${robokassaPassword}`
             const crc = crypto.createHash('md5').update(crcData).digest("hex");
             if (crc !== SignatureValue) return res.json({message: 'oshibka'})
             await Booking.update({isActive: 1}, {where: {id: InvId}})
@@ -144,3 +142,38 @@ class PaymentController {
 }
 
 module.exports = new PaymentController()
+
+const receipt = (name, sum) => ({
+    "items": [
+        {
+            "name": `Услуга разового размещения, Объявление ${name}`,	// Наименование товара/услуг
+            "quantity": 1,						                        // Количество
+            "sum": `${parseInt(sum)}`,				                    // Общая стоимость (cost*quantity)=sum
+            "tax": "none"							                    // без ндс
+        }
+    ]
+})
+const postData = async (login, sum, invId, receipt, signatureValue, email, test) => {
+    const url = 'https://auth.robokassa.ru/Merchant/Indexjson.aspx?';
+    const data = {
+        MerchantLogin: login,
+        OutSum: sum,
+        EMail: email,
+        invoiceID: invId,
+        Receipt: receipt,
+        SignatureValue: signatureValue,
+        istest: parseInt(test)
+    };
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&')
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const responseData = await response.json();
+    return responseData;
+}
