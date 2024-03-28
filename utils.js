@@ -283,6 +283,7 @@ const postData = async (login, sum, invId, receipt, signatureValue, email, test)
         invoiceID: invId,
         Receipt: receipt,
         SignatureValue: signatureValue,
+        Culture: 'ru',
         istest: parseInt(test)
     };
     try {
