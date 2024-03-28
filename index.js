@@ -3,6 +3,8 @@ const cookieParser = require('cookie-parser');
 const express = require('express')
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
+const morgan = require('morgan');
+const fs = require('fs');
 const path = require('path')
 const {sequelize} = require('./models')
 const {chatDB} = require('./db')
@@ -23,7 +25,8 @@ app.use(cookieParser());
 app.use('/static', express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}));
 app.use('/api', position.checkPosition, router)
-
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+app.use(morgan('combined', { stream: accessLogStream }));
 
 //Обработка ошибок последний middleware
 app.use(errorHandler)
