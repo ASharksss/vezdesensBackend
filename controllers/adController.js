@@ -335,7 +335,7 @@ class AdController {
 					const robokassaLogin = process.env.ROBOKASSA_LOGIN
 					const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
 					const receiptData = receipt(ad.dataValues.typeAd.dataValues.name, booking['cost'])
-					const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData))
+					const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData)).replace(/%3A/g, ":" ).replace(/%2C/g,",")
 					let crcData = `${robokassaLogin}:${booking['cost']}:${booking['id']}:${receiptURLEncode}:${robokassaPassword}`
 					const crc = crypto.createHash('md5').update(crcData).digest("hex");
 					const invoice = await postData(robokassaLogin, booking['cost'], booking['id'], receiptURLEncode, crc, ad.dataValues.user.dataValues.email, robokassIsTest)

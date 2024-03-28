@@ -80,7 +80,7 @@ class PaymentController {
                 fChangeKeyName(ads[i], "user.email", 'email')
                 fChangeKeyName(ads[i], "ad.previewImageAds.name", 'previewImage')
                 const receiptData = receipt(ads[i]['name'], ads[i]['OutSum'])
-                const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData))
+                const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData)).replace(/%3A/g, ":" ).replace(/%2C/g,",")
                 let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${receiptURLEncode}:${robokassaPassword}`
                 const crc = crypto.createHash('md5').update(crcData).digest("hex");
                 const invoice = await postData(robokassaLogin, ads[i]['OutSum'], ads[i]['InvId'], receiptURLEncode, crc, ads[i]['email'], robokassIsTest)

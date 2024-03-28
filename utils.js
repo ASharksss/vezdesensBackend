@@ -271,14 +271,7 @@ function trimEndings(str) {
 
 
 const receipt = (name, sum) => ({
-    "items": [
-        {
-            "name": `Услуга разового размещения, Объявление ${name}`,	// Наименование товара/услуг
-            "quantity": 1,						                        // Количество
-            "sum": `${parseInt(sum)}`,				                    // Общая стоимость (cost*quantity)=sum
-            "tax": "none"							                    // без ндс
-        }
-    ]
+    "items": [{"name": `Услуга разового размещения, Объявление ${name}`,"quantity": 1,"sum": sum,"tax": "none"}]
 })
 const postData = async (login, sum, invId, receipt, signatureValue, email, test) => {
     const url = 'https://auth.robokassa.ru/Merchant/Indexjson.aspx?';
@@ -291,6 +284,7 @@ const postData = async (login, sum, invId, receipt, signatureValue, email, test)
         SignatureValue: signatureValue,
         istest: parseInt(test)
     };
+    console.log(Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&'))
     const response = await fetch(url, {
         method: 'POST',
         headers: {
