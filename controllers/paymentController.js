@@ -85,6 +85,7 @@ class PaymentController {
                 const crc = crypto.createHash('md5').update(crcData).digest("hex");
                 const invoice = await postData(robokassaLogin, ads[i]['OutSum'], ads[i]['InvId'], receiptURLEncode, crc, ads[i]['email'], robokassIsTest)
                     .then(async data => {
+                        console.warn(`ad ${ads[i]['InvId']}`, data)
                         return data?.invoiceID;
                     })
                     .catch(error => {

@@ -25,8 +25,22 @@ app.use(cookieParser());
 app.use('/static', express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}));
 app.use('/api', position.checkPosition, router)
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
-app.use(morgan('combined', { stream: accessLogStream }));
+const errorLogStream = fs.createWriteStream(path.join(__dirname, 'error.log'), { flags: 'a' });
+
+// Настройка обработчика для console.warn
+const originalWarn = console.warn;
+console.warn = function(message) {
+  // Запись сообщения в лог-файл
+  errorLogStream.write(`${new Date().toISOString()}: ${message}\n`);
+  // Вызов оригинальной функции console.warn
+  originalWarn.apply(console, arguments);
+};
+
+// Используйте morgan для записи только ошибок в файл
+app.use(morgan('combined', {
+  skip: (req, res) => res.statusCode < 400, // Пропускаем успешные запросы (статусы < 400)
+  stream: errorLogStream
+}));
 
 //Обработка ошибок последний middleware
 app.use(errorHandler)

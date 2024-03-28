@@ -284,7 +284,7 @@ const postData = async (login, sum, invId, receipt, signatureValue, email, test)
         SignatureValue: signatureValue,
         istest: parseInt(test)
     };
-    console.log(Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&'))
+    console.warn(Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&'))
     const response = await fetch(url, {
         method: 'POST',
         headers: {
