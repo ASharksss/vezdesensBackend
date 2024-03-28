@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const sharp = require("sharp");
 
 const EMAIL_USER = process.env.EMAIL_USER
@@ -167,7 +168,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 await sharp(image)
                     .resize({
@@ -176,7 +177,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/mob/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 break;
             case "stPl":
@@ -187,7 +188,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 await sharp(image)
                     .resize({
@@ -196,7 +197,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/mob/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 break;
             case "vp":
@@ -207,7 +208,7 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 await sharp(image)
                     .resize({
@@ -216,25 +217,25 @@ const resizeImage = async (image, fileName, cardType = 'st') => {
                         fit: sharp.fit.cover
                     })
                     .toFile(`static/mob/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 break;
             case "premium":
                 await sharp(image)
                     .resize(1400, 417)
                     .toFile(`static/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 await sharp(image)
                     .resize(325, 189)
                     .toFile(`static/mob/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 break;
             case "card":
                 await sharp(image)
                     .toFile(`static/${fileName}`, (err, info) => {
-                        if(err) console.log(err)
+                        if (err) console.log(err)
                     })
                 break;
 
@@ -271,7 +272,7 @@ function trimEndings(str) {
 
 
 const receipt = (name, sum) => ({
-    "items": [{"name": `Услуга разового размещения, Объявление ${name}`,"quantity": 1,"sum": sum,"tax": "none"}]
+    "items": [{"name": `Услуга разового размещения, Объявление ${name}`, "quantity": 1, "sum": sum, "tax": "none"}]
 })
 const postData = async (login, sum, invId, receipt, signatureValue, email, test) => {
     const url = 'https://auth.robokassa.ru/Merchant/Indexjson.aspx?';
@@ -284,19 +285,21 @@ const postData = async (login, sum, invId, receipt, signatureValue, email, test)
         SignatureValue: signatureValue,
         istest: parseInt(test)
     };
-    console.warn(Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&'))
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&')
-    });
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
+    try {
+        const response = await axios.post(url, new URLSearchParams(data).toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        if (!response.status === 200) {
+            console.warn(response.data);
+            throw new Error('Network response was not ok');
+        }
+        return response.data;
+    } catch (error) {
+        console.warn(error);
+        throw error;
     }
-    const responseData = await response.json();
-    return responseData;
 }
 
 

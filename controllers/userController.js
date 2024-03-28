@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const uuid = require("uuid");
 const path = require("path");
 const fs = require("fs");
+const axios = require("axios")
 const ApiError = require("../error/ApiError");
 const {
 	User, Rating, Ad, Favorite, ImageAd, RebasePassword,
@@ -383,22 +384,23 @@ class UserController {
 
 	async checkINN(req, res, next) {
 		try {
-			const {inn} = req.body
-			const formdata = new FormData();
-			formdata.append("inn", inn);
-
+			const { inn } = req.body;
+			const data = new FormData();
+			data.append("inn", inn);
 			const requestOptions = {
 				method: "POST",
-				body: formdata,
-				redirect: "follow"
+				data: data,
+				redirect: "follow",
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}
 			};
-
-			return await fetch("https://htmlweb.ru/api/service/org?json", requestOptions)
-				.then(async (response) => response.text())
-				.then(async (result) => res.json(JSON.parse(result)))
-				.catch(async (error) => new Error(error));
-		} catch (e) {
-			return next(ApiError.badRequest(e.message))
+			const response = await axios.post("https://htmlweb.ru/api/service/org?json", data, requestOptions);
+			const result = response.data;
+			res.json(result);
+		} catch (error) {
+			console.warn('Error during POST request:', error);
+			return next(ApiError.badRequest(error.message));
 		}
 	}
 

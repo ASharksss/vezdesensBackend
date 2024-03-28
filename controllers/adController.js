@@ -340,7 +340,6 @@ class AdController {
 					const crc = crypto.createHash('md5').update(crcData).digest("hex");
 					const invoice = await postData(robokassaLogin, booking['cost'], booking['id'], receiptURLEncode, crc, ad.dataValues.user.dataValues.email, robokassIsTest)
 						.then(async data => {
-							console.warn(`ad ${booking['id']}`, data)
 							return data?.invoiceID;
 						})
 						.catch(error => {
