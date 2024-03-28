@@ -12,7 +12,7 @@ const {
 	Category, CommercialImageAd
 } = require('../models');
 const {Op} = require("sequelize");
-const {resizeImage} = require("../utils");
+const {resizeImage, postData, receipt} = require("../utils");
 const crypto = require("crypto");
 
 class AdController {
@@ -331,15 +331,23 @@ class AdController {
 					}
 				}
 				if (booking !== null) {
-					const payment_description = `Наименование: "${ad.dataValues.title}" \n Тип: "${ad.dataValues.typeAd.dataValues.name}"`
+					const robokassIsTest = process.env.ROBOKASSA_IS_TEST || 1
 					const robokassaLogin = process.env.ROBOKASSA_LOGIN
 					const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
-					let crcData = `${robokassaLogin}:${booking['cost']}:${booking['id']}:${robokassaPassword}`
+					const receiptData = receipt(ad.dataValues.typeAd.dataValues.name, booking['cost'])
+					const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData))
+					let crcData = `${robokassaLogin}:${booking['cost']}:${booking['id']}:${receiptURLEncode}:${robokassaPassword}`
 					const crc = crypto.createHash('md5').update(crcData).digest("hex");
-					const payment = `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=vezdesens&OutSum=${booking['cost']}&InvoiceID=${booking['id']}&Description=${payment_description}&SignatureValue=${crc}&IsTest=1`
+					const invoice = await postData(robokassaLogin, booking['cost'], booking['id'], receiptURLEncode, crc, ad.dataValues.user.dataValues.email, robokassIsTest)
+						.then(async data => {
+							return data?.invoiceID;
+						})
+						.catch(error => {
+							console.error('Ошибка при выполнении запроса:', error);
+						});
 					ad.dataValues.payment = {
 						cost: booking['cost'],
-						href: payment
+						href: `https://auth.robokassa.ru/Merchant/Index/${invoice}`
 					}
 				}
 			}

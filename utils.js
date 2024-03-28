@@ -269,10 +269,47 @@ function trimEndings(str) {
     return trimWords.join(' ');
 }
 
+
+const receipt = (name, sum) => ({
+    "items": [
+        {
+            "name": `Услуга разового размещения, Объявление ${name}`,	// Наименование товара/услуг
+            "quantity": 1,						                        // Количество
+            "sum": `${parseInt(sum)}`,				                    // Общая стоимость (cost*quantity)=sum
+            "tax": "none"							                    // без ндс
+        }
+    ]
+})
+const postData = async (login, sum, invId, receipt, signatureValue, email, test) => {
+    const url = 'https://auth.robokassa.ru/Merchant/Indexjson.aspx?';
+    const data = {
+        MerchantLogin: login,
+        OutSum: sum,
+        EMail: email,
+        invoiceID: invId,
+        Receipt: receipt,
+        SignatureValue: signatureValue,
+        istest: parseInt(test)
+    };
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: Object.keys(data).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&')
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const responseData = await response.json();
+    return responseData;
+}
+
+
 module.exports = {
     decryptArrayWithKey,
     groupByCharacteristic,
     transporter, HTML_REGISTRATION,
     resizeImage, generateRandomNumbers,
-    HTML_REBASE_PASSWORD, trimEndings
+    HTML_REBASE_PASSWORD, receipt, postData
 }
