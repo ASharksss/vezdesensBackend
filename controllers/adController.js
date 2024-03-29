@@ -517,7 +517,7 @@ class AdController {
 					}
 				},
 				include: [{
-					model: ImageAd,
+					model: PreviewImageAd,
 					required: false
 				}]
 			})
