@@ -252,11 +252,10 @@ class BoardController {
 						{id: {[Op.notIn]: ignoreIds}},
 						{typeAdId: 1},
 						{statusAdId: 2},
-						{address: {
-							[Op.like]: {
-								[Op.any]: cities.map(name => `%${name}%`)
-							}
-						}}
+						{address: cities !== undefined && {
+							[Op.or]: cities.map(name => ({[Op.like]: `%${name}%`}))
+						}
+					}
 					],
 					include: [{
 							model: TypeAd
