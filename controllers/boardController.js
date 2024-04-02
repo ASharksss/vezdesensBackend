@@ -502,14 +502,7 @@ class BoardController {
 						{typeAdId: 1},
 						{statusAdId: 2}
 					],
-					include: [
-						{
-							model: Objects,
-							include: [{
-								model: SubCategory,
-								include: Category
-							}]
-						}, {
+					include: [{
 							model: TypeAd
 						}, {
 							model: User
