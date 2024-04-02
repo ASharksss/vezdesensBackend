@@ -258,7 +258,8 @@ class UserController {
 						{model: ImageAd, required: false},
 						{model: User, attributes: ["name", "phone"]},
 						{model: PreviewImageAd, required: false}]
-				}
+				},
+				order: [['createdAt', 'DESC']]
 			})
 			return res.json(favorite)
 		} catch (e) {
