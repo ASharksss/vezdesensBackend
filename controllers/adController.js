@@ -278,9 +278,6 @@ class AdController {
 			}
 
 			if (userId !== null) {
-				let today = new Date()
-				today.setUTCHours(0, 0, 0, 0)
-				today = today.toISOString().split('T')[0]
 				if (ad.dataValues.typeAd.dataValues.id !== 1) {
 					let booking = undefined
 					const currentDate = new Date().setHours(15, 0, 0, 0)
@@ -353,6 +350,10 @@ class AdController {
 					}
 				}
 			}
+
+			let today = new Date()
+			today.setUTCHours(0, 0, 0, 0)
+			today = today.toISOString().split('T')[0]
 			const {count, rows} = await AdView.findAndCountAll({
 				where: [{adId}, {createdAt: {
 						[Op.and]: {
