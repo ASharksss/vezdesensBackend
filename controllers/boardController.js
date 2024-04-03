@@ -29,16 +29,15 @@ class BoardController {
 			for (const ad of allAds) {
 				//Проверка на просроченные объявления
 				if (new Date(ad.dateEndActive) < currentDate) {
-					ad.statusAdId = 2
+					ad.statusAdId = 4
 					await ad.save()
 				}
 				//Перебор всех бронирований
 				for (const booking of bookings) {
 					//Проверка на дату бронирования
-					if (new Date(booking.dateEnd) < currentDate && booking.isActive === true) {
+					if (new Date(booking.dateEnd) < currentDate && booking.isActive) {
 						booking.isActive = 0
-						ad.typeAdId = 1
-						await ad.save()
+						await Ad.update({typeAdId: 1}, {where: {id: booking.adId}})
 						await booking.save()
 					}
 				}
@@ -300,16 +299,15 @@ class BoardController {
 			for (const ad of allAds) {
 				//Проверка на просроченные объявления
 				if (new Date(ad.dateEndActive) < currentDate) {
-					ad.statusAdId = 3
+					ad.statusAdId = 4
 					await ad.save()
 				}
 				//Перебор всех бронирований
 				for (const booking of bookings) {
 					//Проверка на дату бронирования
-					if (new Date(booking.dateEnd) < currentDate && booking.isActive === true) {
+					if (new Date(booking.dateEnd) < currentDate && booking.isActive) {
 						booking.isActive = 0
-						ad.typeAdId = 1
-						await ad.save()
+						await Ad.update({typeAdId: 1}, {where: {id: booking.adId}})
 						await booking.save()
 					}
 				}

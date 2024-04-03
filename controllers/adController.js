@@ -398,7 +398,9 @@ class AdController {
 			if (userId === null) {
 				return res.json(ApiError.forbidden('Ошибка токена'))
 			}
-			await Ad.update({statusAdId: 4}, {where: {id: adId}})
+			const currentDate = new Date()
+			currentDate.setHours(0, 0, 0, 0)
+			await Ad.update({statusAdId: 4, dateEndActive: currentDate}, {where: {id: adId, userId}})
 			const ads = await Ad.findAll({
 				where: {userId},
 				include: [{model: TypeAd}, {model: StatusAd}, {model: Objects},
