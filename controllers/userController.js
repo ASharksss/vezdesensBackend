@@ -386,17 +386,7 @@ class UserController {
 	async checkINN(req, res, next) {
 		try {
 			const { inn } = req.body;
-			const data = new FormData();
-			data.append("inn", inn);
-			const requestOptions = {
-				method: "POST",
-				data: data,
-				redirect: "follow",
-				headers: {
-					'Content-Type': 'multipart/form-data'
-				}
-			};
-			const response = await axios.post("https://htmlweb.ru/api/service/org?json", data, requestOptions);
+			const response = await axios.post("https://htmlweb.ru/api/service/org?json", {inn});
 			const result = response.data;
 			res.json(result);
 		} catch (error) {
