@@ -144,7 +144,7 @@ class BoardController {
 						model: TypeAd,
 					}, {
 						model: User,
-						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+						attributes: ['id', 'createdAt', 'phone', 'name', 'showPhone']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -169,7 +169,7 @@ class BoardController {
 						model: TypeAd,
 					}, {
 						model: User,
-						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+						attributes: ['id', 'createdAt', 'phone', 'name', 'showPhone']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -197,7 +197,7 @@ class BoardController {
 						model: TypeAd,
 					}, {
 						model: User,
-						attributes: ['id', 'login', 'createdAt', 'phone', 'name']
+						attributes: ['id', 'createdAt', 'phone', 'name', 'showPhone']
 					}, {
 						model: Favorite,
 						where: {userId},
@@ -216,7 +216,10 @@ class BoardController {
 				vipOffset += adsVip.length
 				ads.push(...adsCommercial)
 				ads.push(...adsVip)
-				console.log(ads.length)
+				for (let i = 0; i < ads.length; i++) {
+					if (!ads[i]?.user?.showPhone || userId === null) delete ads[i]?.user.dataValues.phone
+					delete ads[i]?.user.dataValues.showPhone
+				}
 			}
 
 			if (subCategoryId && !objectId) {

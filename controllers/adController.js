@@ -234,7 +234,7 @@ class AdController {
 					required: false
 				}, {
 					model: User,
-					attributes: ['id', 'login', 'email', 'phone', 'name', 'createdAt', 'companyName', 'isCompany'],
+					attributes: ['id', 'phone', 'name', 'createdAt', 'companyName', 'isCompany', 'showPhone'],
 					include: {
 						model: Rating,
 						attributes: ['id', 'text', 'grade', 'customerId', 'createdAt'],
@@ -350,6 +350,10 @@ class AdController {
 					}
 				}
 			}
+
+			if (!ad?.user.showPhone) delete ad?.user.dataValues.phone
+			if (!ad?.user.isCompany) delete ad?.user.dataValues.companyName
+			delete ad?.user.dataValues.showPhone
 
 			let today = new Date()
 			today.setUTCHours(0, 0, 0, 0)
