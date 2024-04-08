@@ -2,6 +2,7 @@ const {QueryTypes, Op} = require("sequelize");
 const ApiError = require('../error/ApiError')
 const {chatDB} = require('../db')
 const {MessageChat, Chat, Ad, User, StatusAd, PreviewImageAd, ImageAd} = require("../models");
+const axios = require("axios");
 
 class chatController {
 
@@ -137,15 +138,13 @@ class chatController {
 		try {
 			const {chats} = req.body
 			for (let i = 0; i < chats.length; i++) {
-				await fetch(`${process.env.CHAT_URL}/${chats[i]}`, {
-					method: 'DELETE'
-				}).then(async response => {
-					const data = await response.json()
-					console.log(data)
-				}).catch(async error => {
-					const err = error
-					console.log(err)
-				})
+				try {
+					const response = await axios.delete(`${process.env.CHAT_URL}/${chats[i]}`);
+					const data = response.data;
+					console.log(data);
+				} catch (error) {
+					console.error(error);
+				}
 			}
 			return res.json({message: 'Ok'})
 		} catch (e) {

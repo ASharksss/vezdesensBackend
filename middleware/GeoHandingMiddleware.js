@@ -1,13 +1,12 @@
-const {PositionCity, PositionRegion} = require('../models')
+const {PositionCity} = require('../models')
 
 module.exports.checkPosition = async function (req, res, next) {
     const positionHeader = req.headers['x-position']
     const positionCookie = req.cookies['position']
-    let positionSlug = positionCookie || positionHeader && positionHeader.split(' ')[1]
+    let positionSlug = positionCookie || positionHeader
     if (positionSlug === null || positionSlug === undefined) {
         req.position = 'Казань'
         positionSlug = 'kazan'
-        return next()
     }
     const city = await PositionCity.findAll({
         where: {citySlug: positionSlug},
