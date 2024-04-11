@@ -180,6 +180,39 @@ class AdController {
 					await ImageAd.create({adId: ad.id, name: fileName})
 				})
 			}
+			if (typeAdId === 2 || typeAdId === 3 || typeAdId === 4) {
+				const user = await User.findOne({where: {id: userId}})
+				const booking = await Booking.findOne({
+					where: {adId: ad.id},
+					attributes: ['id', 'cost', 'userId'],
+					include: {
+						model: Ad,
+						attributes: ['id'],
+						where: {statusAdId: 5}
+					},
+					raw: true
+				})
+				if (booking !== null) {
+					const robokassIsTest = process.env.ROBOKASSA_IS_TEST || 1
+					const robokassaLogin = process.env.ROBOKASSA_LOGIN
+					const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
+					const receiptData = receipt(typeAdBD.name, booking['cost'])
+					const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData)).replace(/%3A/g, ":").replace(/%2C/g, ",")
+					let crcData = `${robokassaLogin}:${booking['cost']}:${booking['id']}:${receiptURLEncode}:${robokassaPassword}`
+					const crc = crypto.createHash('md5').update(crcData).digest("hex");
+					const invoice = await postData(robokassaLogin, booking['cost'], booking['id'], receiptURLEncode, crc, user.email, robokassIsTest)
+						.then(async data => {
+							return data?.invoiceID;
+						})
+						.catch(error => {
+							console.error('Ошибка при выполнении запроса:', error);
+						});
+					ad.dataValues.payment = {
+						cost: booking['cost'],
+						href: `https://auth.robokassa.ru/Merchant/Index/${invoice}`
+					}
+				}
+			}
 			return res.json({ad});
 		} catch (e) {
 			console.log(e)
