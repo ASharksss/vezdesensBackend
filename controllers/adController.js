@@ -286,11 +286,11 @@ class AdController {
 			})
 
 			//Получение просмотров по объявлению
-			const viewsOfAd = await AdView.findAndCountAll({
-				where: {adId}
-			})
+			// const viewsOfAd = await AdView.findAndCountAll({
+			// 	where: {adId}
+			// })
 			//Количество просмотров
-			const viewsCount = viewsOfAd.count
+			// const viewsCount = viewsOfAd.count
 
 			if (userId !== null) {
 				//Все просмотры по объявлению
@@ -400,7 +400,7 @@ class AdController {
 					}}]
 			})
 
-			await Ad.update({views: viewsCount}, {where: {id: adId}})
+			// await Ad.update({views: viewsCount}, {where: {id: adId}})
 			delete ad.dataValues.adViews
 			ad.dataValues.viewsToday = count
 
