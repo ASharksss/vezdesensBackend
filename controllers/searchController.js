@@ -1,9 +1,8 @@
-const uuid = require('uuid');
 const ApiError = require("../error/ApiError");
 const {
     Ad, AdCharacteristicInput, AdCharacteristicSelect,
     Objects, SubCategory, Category,
-    PreviewImageAd, Favorite
+    PreviewImageAd, Favorite, User
 } = require('../models');
 const {Op} = require("sequelize");
 
@@ -97,6 +96,9 @@ class SearchController {
                                 model: Favorite,
                                 where: {userId},
                                 required: false
+                            }, {
+                                model: User,
+                                attributes: parseInt(category) === 3 ? ['phone', 'name', 'id'] : ['name', 'id']
                             }]
                         }
                     }],
@@ -128,6 +130,9 @@ class SearchController {
                                 model: Favorite,
                                 where: {userId},
                                 required: false
+                            }, {
+                                model: User,
+                                attributes: parseInt(category) === 3 ? ['phone', 'name', 'id'] : ['name', 'id']
                             }]
                         }
                     }],
