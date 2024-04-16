@@ -16,6 +16,7 @@ class PaymentController {
                 delete pathKey[oldNameKey];
             }
 
+            const date = new Date()
             const currentDate = new Date().setHours(15, 0, 0, 0)
             const bookings = await Booking.findAll({
                 where: {userId},
@@ -45,7 +46,7 @@ class PaymentController {
             }
             let ads = await Booking.findAll({
                 where: {userId},
-                attributes: ['id', 'cost'],
+                attributes: ['id', 'cost', 'createdAt'],
                 include: [{
                     model: Ad,
                     where: {
@@ -72,6 +73,16 @@ class PaymentController {
             const robokassIsTest = process.env.ROBOKASSA_IS_TEST || 1
             const robokassaPassword = process.env.ROBOKASSA_PASSWORD_1
             for (let i = 0; i < ads.length; i++) {
+                const createdDate = new Date(ads[i]['createdAt'])
+                createdDate.setMinutes(createdDate.getMinutes() + 60)
+                console.log(date, createdDate, !(date < createdDate), ads[i]['id'])
+                if (!(date < createdDate)) {
+                    const index = ads.findIndex(n => n.id === ads[i].id);
+                    if (index !== -1) {
+                        ads.splice(index, 1);
+                    }
+                    continue;
+                }
                 fChangeKeyName(ads[i], 'ad.title', 'title')
                 fChangeKeyName(ads[i], 'cost', 'OutSum')
                 fChangeKeyName(ads[i], 'id', 'InvId')
@@ -80,7 +91,7 @@ class PaymentController {
                 fChangeKeyName(ads[i], "user.email", 'email')
                 fChangeKeyName(ads[i], "ad.previewImageAds.name", 'previewImage')
                 const receiptData = receipt(ads[i]['name'], ads[i]['OutSum'])
-                const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData)).replace(/%3A/g, ":" ).replace(/%2C/g,",")
+                const receiptURLEncode = encodeURIComponent(JSON.stringify(receiptData)).replace(/%3A/g, ":").replace(/%2C/g, ",")
                 let crcData = `${robokassaLogin}:${ads[i]['OutSum']}:${ads[i]['InvId']}:${receiptURLEncode}:${robokassaPassword}`
                 const crc = crypto.createHash('md5').update(crcData).digest("hex");
                 const invoice = await postData(robokassaLogin, ads[i]['OutSum'], ads[i]['InvId'], receiptURLEncode, crc, ads[i]['email'], robokassIsTest)
