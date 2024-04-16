@@ -285,12 +285,12 @@ class AdController {
 				}]
 			})
 
-			//Получение просмотров по объявлению
-			// const viewsOfAd = await AdView.findAndCountAll({
-			// 	where: {adId}
-			// })
-			//Количество просмотров
-			// const viewsCount = viewsOfAd.count
+			// Получение просмотров по объявлению
+			const viewsOfAd = await AdView.findAndCountAll({
+				where: {adId}
+			})
+			// Количество просмотров
+			const viewsCount = viewsOfAd.count
 
 			if (userId !== null) {
 				//Все просмотры по объявлению
@@ -346,20 +346,29 @@ class AdController {
 							}],
 							raw: true
 						})
-						for (let i = 0; i < bookings.length; i++) {
-							if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate) {
-								const time = (new Date(bookings[i]['dateEnd']) - currentDate) / 1000 / 60 / 60 / 24
-								const cost = time * bookings[i]['typeAd.price']
-								bookings[i]['cost'] = cost
-								bookings[i]['dateStart'] = currentDate
-								await Booking.update({cost, dateStart: currentDate}, {
-									where: {id: bookings[i]['id']}
-								})
-							} else {
-								const adId = bookings[i]['adId']
-								await Ad.update({statusAdId: 3}, {where: {id: adId}})
-							}
-						}
+						// for (let i = 0; i < bookings.length; i++) {
+						// 	const currentDate = new Date();
+						// 	const startDate = new Date(bookings[i]['createdAt']);
+						// 	const oneHourLater = new Date(startDate);
+						// 	oneHourLater.setHours(startDate.getHours() + 1);
+
+							// if (currentDate >= oneHourLater) {
+							// 	const adId = booking[i]['adId']
+							// 	await Ad.update({statusAdId: 2}, {where: {id: adId}})
+							// }
+							// if (new Date(bookings[i]['dateStart']) <= currentDate && new Date(bookings[i]['dateEnd']) > currentDate) {
+								// const time = (new Date(bookings[i]['dateEnd']) - currentDate) / 1000 / 60 / 60 / 24
+								// const cost = time * bookings[i]['typeAd.price']
+								// bookings[i]['cost'] = cost
+								// bookings[i]['dateStart'] = currentDate
+								// await Booking.update({cost, dateStart: currentDate}, {
+								// 	where: {id: bookings[i]['id']}
+								// })
+							// } else {
+							// 	const adId = bookings[i]['adId']
+							// 	await Ad.update({statusAdId: 3}, {where: {id: adId}})
+							// }
+						// }
 					}
 					if (booking !== null) {
 						const robokassIsTest = process.env.ROBOKASSA_IS_TEST || 1
@@ -400,7 +409,14 @@ class AdController {
 					}}]
 			})
 
-			// await Ad.update({views: viewsCount}, {where: {id: adId}})
+			const viewsUsers = []
+			for (let i = 0; i < rows.length; i++) {
+				viewsUsers.push(rows[i].userId)
+			}
+
+			if (userId !== null && !viewsUsers.includes(userId)) {
+				await Ad.update({views: parseInt(ad.views) + parseInt(viewsCount)}, {where: {id: adId}})
+			}
 			delete ad.dataValues.adViews
 			ad.dataValues.viewsToday = count
 
