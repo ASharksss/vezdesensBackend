@@ -414,7 +414,7 @@ class AdController {
 				viewsUsers.push(rows[i].userId)
 			}
 
-			if (userId !== null && !viewsUsers.includes(userId)) {
+			if (userId !== null && viewsUsers.length > 0 && !viewsUsers.includes(userId)) {
 				await Ad.update({views: parseInt(ad.views) + parseInt(viewsCount)}, {where: {id: adId}})
 			}
 			delete ad.dataValues.adViews
