@@ -19,7 +19,9 @@ module.exports.checkPosition = async function (req, res, next) {
     })
     if (city.length > 0) {
         req.position = city[0].name;
-        req.cities = allCityInRegion.map(item => item.name);
+        let cities = allCityInRegion.map(item => item.name)
+        cities.push('Россия')
+        req.cities = cities;
         return next()
     } else {
         req.position = 'Казань'
@@ -28,7 +30,9 @@ module.exports.checkPosition = async function (req, res, next) {
             attributes: ['name'],
             raw: true
         })
-        req.cities = allCityInRegion.map(item => item.name);
+        let cities = allCityInRegion.map(item => item.name)
+        cities.push('Россия')
+        req.cities = cities;
         return next()
     }
 }

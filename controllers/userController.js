@@ -31,7 +31,7 @@ class UserController {
 			}
 			const userDB = await User.findOne({
 				where: {id: user.id},
-				attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone'],
+				attributes: ['name', 'login', 'email', 'id', 'createdAt', 'phone', 'isCompany'],
 				include: {
 					model: UserAvatar,
 					attributes: ['name'],
